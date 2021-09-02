@@ -4,6 +4,7 @@
 
 import threading
 import add_data
+import get_address
 import csv
 import asyncio
 
@@ -19,19 +20,19 @@ def main():
     filename = "data_files/others/value_list" + input("file_number 入力：") + ".csv"
     print("ファイル名：" + filename)
 
-    address = add_data.get_address()
+    address = get_address.Get()
 
-    print("aa")
-    thread_1 = threading.Thread(target=add_data.AddData(address))
+    loop = asyncio.new_event_loop()
+    thread_1 = threading.Thread(target=add_data.AddData, args=(address, loop,))
     # thread_2 = threading.Thread(target=ProcessData)
     # thread_3 = threading.Thread(target=analysis_data.AnalysisData)
     thread_4 = threading.Thread(target=Stop)
 
-    print("start!")
     thread_1.start()
     # thread_2.start()
     # thread_3.start()
     thread_4.start()
+    print("start!")
 
     # スレッドの待ち合わせ処理
     thread_list = threading.enumerate()
@@ -44,6 +45,7 @@ def main():
     with open(filename, 'w') as f:
         writer = csv.writer(f, lineterminator='\n')
         writer.writerows(add_data.data_queue)
+
 
 # ================================= メイン関数　実行 ================================ #
 if __name__ == '__main__':

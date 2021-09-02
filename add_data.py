@@ -10,6 +10,7 @@ import struct
 import numpy as np
 import time
 import stop
+import get_address
 
 # ============================ 変数宣言部 ============================== #
 # ウィンドウ単位の処理用定数
@@ -79,7 +80,7 @@ class Sensor:
 
             # 5秒後に終了
             # await asyncio.sleep(1.0, loop=self.loop)
-            while stop.Stop():
+            while stop.stop_flg:
                 await asyncio.sleep(1.0, loop=self.loop)
             await client.stop_notify(UUID8)
             # サンプリング終了
@@ -87,7 +88,7 @@ class Sensor:
             
     # ウィンドウ処理を行う
     def process_window(self):
-        while stop.Stop():
+        while stop.stop_flg:
             # キュー内のデータ数がサンプル数を超えたら作動
             if len(data_queue) > N:
                 not_dup = int(N * (1 - OVERLAP / 100))  # 重複しない部分の個数
@@ -108,13 +109,13 @@ class Sensor:
 
 
 # ============================ データ取得スレッド ============================== #
-def AddData(address):
-    loop = asyncio.get_event_loop()
+def AddData(address, loop):
+    asyncio.set_event_loop(loop)
     loop.run_until_complete(Sensor(address, loop).ReadSensor())
 
-def get_address():
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(search_eSense())
+# def get_address():
+#     loop = asyncio.get_event_loop()
+#     loop.run_until_complete(search_eSense())
 
 # def AddData1():
 #     filename = "data_files/others/value_list" + input("file_number 入力：") + ".csv"
