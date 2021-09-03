@@ -5,12 +5,12 @@
 import csv
 import asyncio
 import platform
-from bleak import discover
+from bleak import discover, BleakClient
 import struct
-from bleak import BleakClient
 import numpy as np
 import time
 import stop
+import get_address
 
 # ============================ 変数宣言部 ============================== #
 # ウィンドウ単位の処理用定数
@@ -18,7 +18,7 @@ T = 10              # サンプリング周期 [Hz]
 OVERLAP = 50        # オーバーラップ率 [%]
 N = T * 2           # サンプル数
 byte_sample = bytearray([0x53, 0x03, 0x02, 0x01, 0x00])     # UUID7　書き込み用バイト（サンプリング開始）
-
+eSense_address = 0
 sec = 0             # 秒数
 data_queue = []     # 保存用変数
 
@@ -80,7 +80,7 @@ class Sensor:
 
             # 5秒後に終了
             # await asyncio.sleep(1.0, loop=self.loop)
-            while stop.Stop():
+            while stop.stop_flg:
                 await asyncio.sleep(1.0, loop=self.loop)
             await client.stop_notify(UUID8)
             # サンプリング終了
@@ -109,20 +109,28 @@ class Sensor:
 
 
 # ============================ データ取得スレッド ============================== #
-def AddData():
-    filename = "data_files/others/value_list" + input("file_number 入力：") + ".csv"
-    print("ファイル名：" + filename)
-
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(search_eSense())
-    address = eSense_address[0]
-    loop = asyncio.get_event_loop()
+def AddData(address, loop):
+    asyncio.set_event_loop(loop)
     loop.run_until_complete(Sensor(address, loop).ReadSensor())
 
-    with open(filename, 'w') as f:
-        writer = csv.writer(f, lineterminator='\n')
-        writer.writerows(data_queue)
+# def get_address():
+#     loop = asyncio.get_event_loop()
+#     loop.run_until_complete(search_eSense())
 
-
-if __name__ == '__main__':
-    AddData()
+# def AddData1():
+#     filename = "data_files/others/value_list" + input("file_number 入力：") + ".csv"
+#     print("ファイル名：" + filename)
+#
+#     loop = asyncio.get_event_loop()
+#     loop.run_until_complete(search_eSense())
+#     address = eSense_address[0]
+#     loop = asyncio.get_event_loop()
+#     loop.run_until_complete(Sensor(address, loop).ReadSensor())
+#
+#     with open(filename, 'w') as f:
+#         writer = csv.writer(f, lineterminator='\n')
+#         writer.writerows(data_queue)
+#
+#
+# if __name__ == '__main__':
+#     AddData1()
