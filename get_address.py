@@ -5,8 +5,7 @@
 import asyncio
 from bleak import discover
 
-# ============================ eSenseの処理 ============================== #
-# eSenseのアドレスを取得
+# ============================ eSenseのアドレスを取得 ============================== #
 eSense_address = 0
 async def search_eSense():
     global eSense_address
@@ -20,7 +19,7 @@ async def search_eSense():
                 eSense_address = str(d).rsplit(':', 1)
 
 
-# ============================ データ取得スレッド ============================== #
+# ============================ アドレス取得スレッド ============================== #
 def Get():
     loop1 = asyncio.get_event_loop()
     loop1.run_until_complete(search_eSense())
