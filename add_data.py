@@ -25,6 +25,7 @@ w = []
 data_queue = []  # 保存用変数
 data_list = []
 sensor = 0
+window = []
 
 # eSENSE キャラクタリスティックUUID
 UUID7 = "0000ff07-0000-1000-8000-00805f9b34fb"  # サンプリング開始/終了 (R/W)
@@ -58,7 +59,7 @@ class Sensor:
     def __init__(self, address, loop):
         self.address = address
         self.loop = loop
-        self.window = []
+        # self.window = []
 
     # Notify 呼び出し関数
     def callback(sender, value):
@@ -95,29 +96,54 @@ class Sensor:
             # サンプリング終了
             await client.write_gatt_char(UUID7, bytearray([0x53, 0x02, 0x02, 0x00, 0x00]), response=True)
 
-    # ウィンドウ処理を行う
-    def process_window(self):
-        global window_num, w
-        while stop.stop_flg:
-            # キュー内のデータ数がサンプル数を超えたら作動
-            if len(data_queue) > N:
-                not_dup = int(N * (1 - OVERLAP / 100))  # 重複しない部分の個数
-                if not_dup < 1:
-                    not_dup = 1
+    # # ウィンドウ処理を行う
+    # def process_window(self):
+    #     global window_num, w
+    #     while stop.stop_flg:
+    #         # キュー内のデータ数がサンプル数を超えたら作動
+    #         if len(data_queue) > N:
+    #             not_dup = int(N * (1 - OVERLAP / 100))  # 重複しない部分の個数
+    #             if not_dup < 1:
+    #                 not_dup = 1
+    #
+    #             # サンプル数（N）分のデータを格納するリスト（window）の作成
+    #             for _ in range(not_dup):
+    #                 # 重複しない部分のデータはキューから削除
+    #                 self.window.append(data_queue.pop(0))
+    #             for i in range(N - not_dup):
+    #                 self.window.append(data_queue[i])
+    #
+    #             if self.window != []:
+    #                 w = self.window
+    #                 self.window = []  # ウィンドウをリセット
+    #                 window_num += 1
+    #                 return w, window_num
+    #     return w, window_num
 
-                # サンプル数（N）分のデータを格納するリスト（window）の作成
-                for _ in range(not_dup):
-                    # 重複しない部分のデータはキューから削除
-                    self.window.append(data_queue.pop(0))
-                for i in range(N - not_dup):
-                    self.window.append(data_queue[i])
 
-                if self.window != []:
-                    w = self.window
-                    self.window = []  # ウィンドウをリセット
-                    window_num += 1
-                    return w, window_num
-        return w, window_num
+# ウィンドウ処理を行う
+def process_window():
+    global window_num, w, window
+    while stop.stop_flg:
+        # キュー内のデータ数がサンプル数を超えたら作動
+        if len(data_queue) > N:
+            not_dup = int(N * (1 - OVERLAP / 100))  # 重複しない部分の個数
+            if not_dup < 1:
+                not_dup = 1
+
+            # サンプル数（N）分のデータを格納するリスト（window）の作成
+            for _ in range(not_dup):
+                # 重複しない部分のデータはキューから削除
+                window.append(data_queue.pop(0))
+            for i in range(N - not_dup):
+                window.append(data_queue[i])
+
+            if window:
+                w = window
+                window = []  # ウィンドウをリセット
+                window_num += 1
+                return w, window_num
+    return w, window_num
 
 
 # ============================ データ取得スレッド ============================== #
