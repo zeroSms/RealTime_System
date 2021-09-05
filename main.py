@@ -13,13 +13,31 @@ import pandas as pd
 from stop import Stop
 from enter_label import Label
 
+# ================================= CSV出力 ================================ #
+# ログファイル出力
+def getCsv_log(file_num):
+    log_name = "log_files/value_list" + file_num + ".csv"
+    with open(log_name, 'w') as f:
+        writer = csv.writer(f, lineterminator='\n')
+        writer.writerows(add_data.log_data)
+
+# 教師データ，正解データ出力
+def getCsv_analy(ex_num):
+    window_name = "analysis_files/window_files/window_list" + ex_num + ".csv"
+    answer_name = "analysis_files/answer_files/answer_list" + ex_num + ".csv"
+    print(process_data.answer_list)
+    with open(window_name, 'w') as f:
+        writer = csv.writer(f, lineterminator='\n')
+        writer.writerows(process_data.analysis_csv)
+    with open(answer_name, 'w') as f:
+        writer = csv.writer(f, lineterminator='\n')
+        writer.writerow(process_data.answer_list)
+
 
 # ================================= メイン関数 ================================ #
-
 # メイン関数
 def main():
-    filename = "data_files/others/value_list" + input("file_number 入力：") + ".csv"
-    print("ファイル名：" + filename)
+    file_num = input("file_number 入力：")
     ex_num = input("実験番号：")
 
     address = get_address.Get()
@@ -46,19 +64,8 @@ def main():
 
     print("全てのスレッドが終了しました．これからデータログを送信します．")
 
-    with open(filename, 'w') as f:
-        writer = csv.writer(f, lineterminator='\n')
-        writer.writerows(add_data.data_list)
-
-    # window_name = "window_files/window_list" + ex_num + ".csv"
-    # answer_name = "answer_files/answer_list" + ex_num + ".csv"
-    # print(process_data.answer_list)
-    # with open(window_name, 'w') as f:
-    #     writer = csv.writer(f, lineterminator='\n')
-    #     writer.writerows(process_data.analysis_csv)
-    # with open(answer_name, 'w') as f:
-    #     writer = csv.writer(f, lineterminator='\n')
-    #     writer.writerow(process_data.answer_list)
+    getCsv_log(file_num)        # ログファイル出力
+    # getCsv_analy(ex_num)        # 教師データ，正解データ出力
 
 
 # ================================= メイン関数　実行 ================================ #

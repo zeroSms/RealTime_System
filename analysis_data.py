@@ -2,20 +2,42 @@
 # データ分析スレッド
 #
 
-
-import itertools
-import collections
-import numpy as np
+from tsfresh import extract_features, extract_relevant_features, select_features
+from tsfresh.utilities.dataframe_functions import impute
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
+import xgboost as xgb
 import pandas as pd
-import process_data
-import stop
-
-
+import numpy as np
 
 
 # ============================ データ分析スレッド ============================== #
 # 処理したデータを分析するスレッド
-def AnalysisData():
+if __name__ == '__main__':
+
+    # 特徴量抽出
+    df = pd.read_csv('analysis_files/analysis.csv', encoding='utf-8')
+    X = extract_features(df, column_id='action')
+    print(X.shape)
+
+    # 正解データ取得
+    y = np.loadtxt('analysis_files/answer_files/answer.csv', delimiter=",", dtype='int')
+    y = pd.Series(data=y)
+    y.index += 1
+
+    # 特徴量削減
+    impute(X)
+    X = select_features(X, y)
+
+    # 学習データとテストデータに分割
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.2)
+
+    cl = xgb.XGBClassifier()
+    cl.fit(X_train, y_train)
+    print(classification_report(y_test, cl.predict(X_test)))
+
+    importances = pd.Series(index=X_train.columns, data=cl.feature_importances_)
+    print(importances.sort_values(ascending=False).head(10))
 
 
 
