@@ -12,18 +12,18 @@ import time
 import stop
 import enter_label
 import get_address
+import setup_variable
 
 # ============================ 変数宣言部 ============================== #
 # ウィンドウ単位の処理用定数
-T = 10  # サンプリング周期 [Hz]
-OVERLAP = 50  # オーバーラップ率 [%]
-N = T * 2  # サンプル数
+T = setup_variable.T  # サンプリング周期 [Hz]
+N = setup_variable.N  # ウィンドウサイズ
+OVERLAP = setup_variable.OVERLAP  # オーバーラップ率 [%]
 byte_sample = bytearray([0x53, 0x03, 0x02, 0x01, 0x00])  # UUID7　書き込み用バイト（サンプリング開始）
 eSense_address = 0
-window_num = 0  # window番号
 w = []
-data_queue = []     # 分析用データ格納
-log_data = []       # 保存用データ格納
+data_queue = []  # 分析用データ格納
+log_data = []  # 保存用データ格納
 sensor = 0
 
 # eSENSE キャラクタリスティックUUID
@@ -39,7 +39,6 @@ def sampling_byte():
     byte_sample[4] += T
     return byte_sample
 
-
 # eSenseのアドレスを取得
 async def search_eSense():
     global eSense_address
@@ -51,7 +50,6 @@ async def search_eSense():
                 eSense_flg = False
                 print(d)
                 eSense_address = str(d).rsplit(':', 1)
-
 
 # センサの設定を行うクラス
 class Sensor:
@@ -65,17 +63,27 @@ class Sensor:
         TimeStamp = time.time()
         shape_int16 = struct.unpack('>bbbbhhhhhh', value)  # Binary変換　デコード
 
-        value_acc_X, value_acc_Y, value_acc_Z = shape_int16[7], shape_int16[8], shape_int16[9]
-        value_gyro_X, value_gyro_Y, value_gyro_Z = shape_int16[4], shape_int16[5], shape_int16[6]
+        # accの値をm/s^2に変換
+        value_acc_X = shape_int16[7] / 8192 * 9.80665
+        value_acc_Y = shape_int16[8] / 8192 * 9.80665
+        value_acc_Z = shape_int16[9] / 8192 * 9.80665
+
+        # gyroの値をdeg/sに変換
+        value_gyro_X = shape_int16[4] / 65.5
+        value_gyro_Y = shape_int16[5] / 65.5
+        value_gyro_Z = shape_int16[6] / 65.5
+
+        acc_xyz = (value_acc_X**2 + value_acc_Y**2 + value_acc_Z**2) ** 0.5
+        gyro_xyz = (value_gyro_X**2 + value_gyro_X**2 + value_gyro_X**2) ** 0.5
 
         # データ保存
         data_queue.append([enter_label.label_flg, TimeStamp,
-                           value_acc_X, value_acc_Y, value_acc_Z, value_gyro_X, value_gyro_Y, value_gyro_Z])
+                           value_acc_X, value_acc_Y, value_acc_Z, value_gyro_X, value_gyro_Y, value_gyro_Z, acc_xyz, gyro_xyz])
         log_data.append([enter_label.label_flg, TimeStamp,
-                          value_acc_X, value_acc_Y, value_acc_Z, value_gyro_X, value_gyro_Y, value_gyro_Z])
+                         value_acc_X, value_acc_Y, value_acc_Z, value_gyro_X, value_gyro_Y, value_gyro_Z, acc_xyz, gyro_xyz])
         # 表示
-        print("Acc: {0} {1} {2}".format(value_acc_X, value_acc_Y, value_acc_Z))
-        print("Gyro: {0} {1} {2}".format(value_gyro_X, value_gyro_Y, value_gyro_Z))
+        # print("Acc: {0} {1} {2}".format(value_acc_X, value_acc_Y, value_acc_Z))
+        # print("Gyro: {0} {1} {2}".format(value_gyro_X, value_gyro_Y, value_gyro_Z))
 
     # センサからデータを取得
     async def ReadSensor(self):
@@ -97,7 +105,7 @@ class Sensor:
 
     # ウィンドウ処理を行う
     def process_window(self):
-        global window_num, w
+        global w
         while stop.stop_flg:
             # キュー内のデータ数がサンプル数を超えたら作動
             if len(data_queue) > N:
@@ -115,9 +123,7 @@ class Sensor:
                 if self.window:
                     w = self.window
                     self.window = []  # ウィンドウをリセット
-                    window_num += 1
-                    return w, window_num
-        return w, window_num
+                    return w
 
 
 # ============================ データ取得スレッド ============================== #
