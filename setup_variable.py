@@ -5,7 +5,6 @@
 
 # ============================ 変数宣言部 ============================== #
 # 分析用データのラベル
-
 process_columns = ['window_ID', 'timeStamp',
                    'acc_X', 'acc_Y', 'acc_Z',
                    'gyro_X', 'gyro_Y', 'gyro_Z']

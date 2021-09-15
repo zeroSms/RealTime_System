@@ -71,9 +71,10 @@ def Realtime_analysis():
             feature_list.append(get_feature.get_feature(window))
             X = pd.DataFrame(feature_list)
             y_pred = clf.predict(X)
-            print(y_pred)
+            print(y_pred)           # 判定された行動の出力
             realtime_pred.extend(y_pred)
             feature_list = []
+
     print(realtime_pred)
     test_y = pd.Series(data=answer_list)
     y_pred = pd.Series(data=realtime_pred)

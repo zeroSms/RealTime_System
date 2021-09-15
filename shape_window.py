@@ -8,13 +8,13 @@ import numpy as np
 import collections
 import pandas as pd
 
+# 自作ライブラリ
 import setup_variable
 import get_feature
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
-
 
 import matplotlib.pyplot as plt
 import japanize_matplotlib
@@ -42,31 +42,6 @@ def label_shape(window):
     window_T[0] = [window_num] * len(window)  # window_IDの追加
 
     return window_T.T
-
-
-# 生データのスケーリング
-def scaling_data(df):
-    # accの値をm/s^2に変換
-    df['acc_X'] = df['acc_X'] / 8192 * 9.80665
-    df['acc_Y'] = df['acc_Y'] / 8192 * 9.80665
-    df['acc_Z'] = df['acc_Z'] / 8192 * 9.80665
-
-    # gyroの値をdeg/sに変換
-    df['gyro_X'] = df['gyro_X'] / 65.5
-    df['gyro_Y'] = df['gyro_Y'] / 65.5
-    df['gyro_Z'] = df['gyro_Z'] / 65.5
-    return df
-
-
-# 合成軸の計算
-def mixed_acc(df):
-    result = (df['acc_X'] ** 2 + df['acc_Y'] ** 2 + df['acc_Z'] ** 2) ** 0.5
-    return result
-
-
-def mixed_gyro(df):
-    result = (df['gyro_X'] ** 2 + df['gyro_Y'] ** 2 + df['gyro_Z'] ** 2) ** 0.5
-    return result
 
 
 # ============================ ウィンドウ処理スレッド ============================== #
@@ -118,12 +93,6 @@ def do_process_window():
         df_data_queue = pd.read_csv(file_name, names=(
             setup_variable.analysis_columns))
 
-        # # スケーリング
-        # df_data_queue = scaling_data(df_data_queue)
-        # # 合成軸の計算・追加
-        # df_data_queue['acc_xyz'] = df_data_queue.apply(mixed_acc, axis=1)
-        # df_data_queue['gyro_xyz'] = df_data_queue.apply(mixed_gyro, axis=1)
-
         # キュー内のデータ数がサンプル数を超えている間作動
         data_queue = df_data_queue.values.tolist()
         while len(data_queue) > N:
@@ -161,7 +130,7 @@ if __name__ == '__main__':
     y = np.loadtxt("analysis_files/answer_files/answer_list"+ex_num+".csv", delimiter=",", dtype='int')
     y = pd.Series(data=y)
 
-    (train_x, test_x, train_y, test_y) = train_test_split(X, y, test_size=0.3)
+    (train_x, test_x, train_y, test_y) = train_test_split(X, y, test_size=0.3, stratify=y)
     clf = RandomForestClassifier(max_depth=30, n_estimators=100, random_state=42)
     clf.fit(train_x, train_y)
     y_pred = clf.predict(test_x)
