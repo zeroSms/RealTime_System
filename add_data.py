@@ -2,16 +2,14 @@
 # データ取得スレッド
 #
 
-import csv
 import asyncio
-import platform
 from bleak import discover, BleakClient
 import struct
-import numpy as np
 import time
+
+# 自作ライブラリ
 import stop
 import enter_label
-import get_address
 import setup_variable
 
 # ============================ 変数宣言部 ============================== #
@@ -73,6 +71,7 @@ class Sensor:
         value_gyro_Y = shape_int16[5] / 65.5
         value_gyro_Z = shape_int16[6] / 65.5
 
+        # 合成軸を計算
         acc_xyz = (value_acc_X**2 + value_acc_Y**2 + value_acc_Z**2) ** 0.5
         gyro_xyz = (value_gyro_X**2 + value_gyro_X**2 + value_gyro_X**2) ** 0.5
 

@@ -3,13 +3,13 @@
 #
 
 import threading
+import csv
+import asyncio
+
+# 自作ライブラリ
 import add_data
 import process_data
 import get_address
-import csv
-import asyncio
-# import analysis_data
-import pandas as pd
 from stop import Stop
 from enter_label import Label
 
@@ -22,7 +22,7 @@ def getCsv_log(file_num):
         writer.writerows(add_data.log_data)
 
 # 教師データ，正解データ出力
-def getCsv_analy(ex_num):
+def getCsv_analysis(ex_num):
     window_name = "analysis_files/window_files/window_list" + ex_num + ".csv"
     answer_name = "analysis_files/answer_files/answer_list" + ex_num + ".csv"
     print(process_data.answer_list)
@@ -65,7 +65,7 @@ def main():
     print("全てのスレッドが終了しました．これからデータログを送信します．")
 
     getCsv_log(file_num)        # ログファイル出力
-    # getCsv_analy(ex_num)        # 教師データ，正解データ出力
+    # getCsv_analysis(ex_num)        # 教師データ，正解データ出力
 
 
 # ================================= メイン関数　実行 ================================ #

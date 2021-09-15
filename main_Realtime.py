@@ -1,15 +1,14 @@
 #
 # メイン関数
 #
-
 import threading
+import csv
+import asyncio
+
+# 自作ライブラリ
 import add_data
 import process_data
 import get_address
-import csv
-import asyncio
-# import analysis_data
-import pandas as pd
 from stop import Stop
 from enter_label import Label
 
