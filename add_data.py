@@ -15,7 +15,7 @@ import setup_variable
 # ============================ 変数宣言部 ============================== #
 # ウィンドウ単位の処理用定数
 T = setup_variable.T  # サンプリング周期 [Hz]
-N = setup_variable.N  # ウィンドウサイズ
+N = setup_variable.N  # ウィンドウサイズ(1.28秒)
 OVERLAP = setup_variable.OVERLAP  # オーバーラップ率 [%]
 byte_sample = bytearray([0x53, 0x03, 0x02, 0x01, 0x00])  # UUID7　書き込み用バイト（サンプリング開始）
 eSense_address = 0
@@ -73,13 +73,12 @@ class Sensor:
 
         # 合成軸を計算
         acc_xyz = (value_acc_X**2 + value_acc_Y**2 + value_acc_Z**2) ** 0.5
-        gyro_xyz = (value_gyro_X**2 + value_gyro_X**2 + value_gyro_X**2) ** 0.5
 
         # データ保存
         data_queue.append([enter_label.label_flg, TimeStamp,
-                           value_acc_X, value_acc_Y, value_acc_Z, value_gyro_X, value_gyro_Y, value_gyro_Z, acc_xyz, gyro_xyz])
+                           value_acc_X, value_acc_Y, value_acc_Z, value_gyro_X, value_gyro_Y, value_gyro_Z, acc_xyz])
         log_data.append([enter_label.label_flg, TimeStamp,
-                         value_acc_X, value_acc_Y, value_acc_Z, value_gyro_X, value_gyro_Y, value_gyro_Z, acc_xyz, gyro_xyz])
+                         value_acc_X, value_acc_Y, value_acc_Z, value_gyro_X, value_gyro_Y, value_gyro_Z, acc_xyz])
         # 表示
         # print("Acc: {0} {1} {2}".format(value_acc_X, value_acc_Y, value_acc_Z))
         # print("Gyro: {0} {1} {2}".format(value_gyro_X, value_gyro_Y, value_gyro_Z))
