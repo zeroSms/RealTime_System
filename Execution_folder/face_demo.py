@@ -4,7 +4,7 @@ from paz.backend.camera import Camera
 from paz.pipelines import DetectMiniXceptionFER
 
 
-if __name__ == "__main__":
+def face_detection():
     parser = argparse.ArgumentParser(description='Real-time face classifier')
     parser.add_argument('-c', '--camera_id', type=int, default=0,
                         help='Camera device ID')
@@ -16,3 +16,7 @@ if __name__ == "__main__":
     camera = Camera(args.camera_id)
     player = VideoPlayer((640, 480), pipeline, camera)
     player.run()
+
+
+if __name__ == "__main__":
+    face_detection()

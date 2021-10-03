@@ -12,14 +12,15 @@ from . import add_data, get_feature, setup_variable, stop
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
-analysis_csv = [setup_variable.analysis_columns]   # windowデータの追加
-answer_list = []    # 正解データリスト（windowごと）
-feature_list = []   # 特徴量抽出データ
+analysis_csv = [setup_variable.analysis_columns]  # windowデータの追加
+answer_list = []  # 正解データリスト（windowごと）
+feature_list = []  # 特徴量抽出データ
 window_num = 0  # window番号
 realtime_pred = []
 
 # ================================= パスの取得 ================================ #
 path = setup_variable.path
+
 
 # ============================ ラベル整形スレッド ============================== #
 # ウィンドウラベルの付与，正解ラベルデータの作成
@@ -34,7 +35,7 @@ def label_shape(window):
         answer_list.append(2)
     else:
         answer_list.append(0)
-    window_T[0] = [window_num] * len(window)    # window_IDの追加
+    window_T[0] = [window_num] * len(window)  # window_IDの追加
 
     return window_T.T
 
@@ -74,7 +75,7 @@ def Realtime_analysis():
             feature_list.append(get_feature.get_feature(window))
             X = pd.DataFrame(feature_list)
             y_pred = clf.predict(X)
-            print(y_pred)           # 判定された行動の出力
+            print(y_pred)  # 判定された行動の出力
             realtime_pred.extend(y_pred)
             feature_list = []
 
@@ -82,8 +83,3 @@ def Realtime_analysis():
     test_y = pd.Series(data=answer_list)
     y_pred = pd.Series(data=realtime_pred)
     print(accuracy_score(test_y, y_pred))
-
-
-
-
-
