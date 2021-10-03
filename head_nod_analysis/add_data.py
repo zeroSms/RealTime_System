@@ -13,7 +13,7 @@ from . import enter_label, setup_variable, stop
 # ============================ 変数宣言部 ============================== #
 # ウィンドウ単位の処理用定数
 T = setup_variable.T  # サンプリング周期 [Hz]
-N = setup_variable.N  # ウィンドウサイズ(1.28秒)
+N = setup_variable.N  # ウィンドウサイズ(0.64秒)
 OVERLAP = setup_variable.OVERLAP  # オーバーラップ率 [%]
 byte_sample = bytearray([0x53, 0x03, 0x02, 0x01, 0x00])  # UUID7　書き込み用バイト（サンプリング開始）
 eSense_address = 0

@@ -53,8 +53,10 @@ def ProcessData():
 # 測定したデータを処理する関数
 def Realtime_analysis():
     global window_num, feature_list
-    train_x = pd.read_csv(path + '/data_set/analysis_files/feature_files/feature_list1.csv', header=None)
-    y = np.loadtxt(path + '/data_set/analysis_files/answer_files/answer_list1.csv', delimiter=",", dtype='int')
+    filename = path + '\\data_set\\analysis_files\\feature_files\\feature_list1.csv'
+    train_x = pd.read_csv(filename, header=None)
+    filename = path + '\\data_set\\analysis_files\\answer_files\\answer_list1.csv'
+    y = np.loadtxt(filename, delimiter=",", dtype='int')
     train_y = pd.Series(data=y)
 
     clf = RandomForestClassifier(max_depth=30, n_estimators=30, random_state=42)
