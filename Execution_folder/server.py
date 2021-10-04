@@ -2,16 +2,30 @@ import socket
 
 
 def server():
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    print(socket.gethostname())
-    s.bind((socket.gethostname(), 8080))  # IPとポート番号を指定します
-    s.listen(5)
+    host = socket.gethostname()  # お使いのサーバーのホスト名を入れます
+    port = 8888  # クライアントで設定したPORTと同じもの指定してあげます
+
+    serversock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    serversock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    serversock.bind((host, port))  # IPとPORTを指定してバインドします
+    serversock.listen(10)  # 接続の待ち受けをします（キューの最大数を指定）
+
+    print('Waiting for connections...')
+    clientsock, client_address = serversock.accept()  # 接続されればデータを格納
 
     while True:
-        clientsocket, address = s.accept()
-        print(f"Connection from {address} has been established!")
-        clientsocket.send(bytes("Welcome to the server!", 'utf-8'))
-        clientsocket.close()
+        rcvmsg = clientsock.recv(1024)
+        print('Received -> %s' % (rcvmsg))
+        if rcvmsg == '':
+            break
+        print('Type message...')
+        s_msg = input().replace('b', '').encode('utf-8')
+        if s_msg == '':
+            break
+        print('Wait...')
+
+        clientsock.sendall(s_msg)  # メッセージを返します
+    clientsock.close()
 
 
 # ================================= メイン関数　実行 ================================ #
