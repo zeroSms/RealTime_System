@@ -3,13 +3,15 @@ import socket
 
 def client():
     host = socket.gethostname()  # お使いのサーバーのホスト名を入れます
-    port = 8888  # 適当なPORTを指定してあげます
+    print(host)
+    print(socket.gethostbyname(host))
+    port = 50000  # 適当なPORTを指定してあげます
 
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # オブジェクトの作成をします
 
     client.connect((host, port))  # これでサーバーに接続します
 
-    massage = "from nadechin"
+    massage = "Success"
 
     client.send(massage.encode('utf-8'))  # 適当なデータを送信します（届く側にわかるように）
 

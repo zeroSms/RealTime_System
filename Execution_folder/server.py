@@ -3,7 +3,7 @@ import socket
 
 def server():
     host = socket.gethostname()  # お使いのサーバーのホスト名を入れます
-    port = 8888  # クライアントで設定したPORTと同じもの指定してあげます
+    port = 50000  # クライアントで設定したPORTと同じもの指定してあげます
 
     serversock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serversock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
