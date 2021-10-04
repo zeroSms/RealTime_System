@@ -2,7 +2,6 @@ import socket
 
 
 def client():
-
     host = socket.gethostname()  # お使いのサーバーのホスト名を入れます
     port = 8888  # 適当なPORTを指定してあげます
 
