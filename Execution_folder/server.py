@@ -3,7 +3,8 @@ import socket
 
 def server():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind((socket.gethostname(), 1235))  # IPとポート番号を指定します
+    print(socket.gethostname())
+    s.bind((socket.gethostname(), 8080))  # IPとポート番号を指定します
     s.listen(5)
 
     while True:
