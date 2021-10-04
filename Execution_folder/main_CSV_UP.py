@@ -11,9 +11,9 @@ from head_nod_analysis import add_data, process_data, get_address, setup_variabl
 from head_nod_analysis.stop import Stop
 from head_nod_analysis.enter_label import Label
 
-
 # ================================= パスの取得 ================================ #
 path = setup_variable.path
+
 
 # ================================= CSV出力 ================================ #
 # ログファイル出力
@@ -23,27 +23,16 @@ def getCsv_log(file_num):
         writer = csv.writer(f, lineterminator='\n')
         writer.writerows(add_data.log_data)
 
-# 教師データ，正解データ出力
-def getCsv_analysis(ex_num):
-    window_name = path + '/data_set/analysis_files/window_files/window_list' + ex_num + '.csv'
-    answer_name = path + '/data_set/analysis_files/answer_files/answer_list' + ex_num + '.csv'
-    print(process_data.answer_list)
-    with open(window_name, 'w') as f:
-        writer = csv.writer(f, lineterminator='\n')
-        writer.writerows(process_data.analysis_csv)
-    with open(answer_name, 'w') as f:
-        writer = csv.writer(f, lineterminator='\n')
-        writer.writerow(process_data.answer_list)
-
 
 # ================================= メイン関数 ================================ #
 # メイン関数
 def main():
-    file_num = input('file_number 入力：')
     ex_num = input('実験番号：')
 
+    # eSenseアドレスを取得
     address = get_address.Get()
 
+    # 頭の動きのセンシング　スレッド開始
     loop = asyncio.new_event_loop()
     thread_1 = threading.Thread(target=add_data.AddData, args=(address, loop,))
     # thread_2 = threading.Thread(target=process_data.ProcessData)
@@ -65,9 +54,7 @@ def main():
         thread.join()
 
     print('全てのスレッドが終了しました．これからデータログを送信します．')
-
-    getCsv_log(file_num)        # ログファイル出力
-    # getCsv_analysis(ex_num)        # 教師データ，正解データ出力
+    getCsv_log(ex_num)  # ログファイル出力
 
 
 # ================================= メイン関数　実行 ================================ #

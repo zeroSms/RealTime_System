@@ -16,4 +16,4 @@ def Stop():
     # エンターが入力されるまで待ち続ける
     input()
     stop_flg = False
-    print("stop!")
+    print("stop!\n")

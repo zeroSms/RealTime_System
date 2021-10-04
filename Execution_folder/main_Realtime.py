@@ -25,7 +25,6 @@ def getCsv_log(ex_num):
 def getCsv_analysis(ex_num):
     window_name = path + '/data_set/realtime_files/window_files/window_list' + ex_num + '.csv'
     answer_name = path + '/data_set/realtime_files/answer_files/answer_list' + ex_num + '.csv'
-    print(process_data.answer_list)
     with open(window_name, 'w') as f:
         writer = csv.writer(f, lineterminator='\n')
         writer.writerows(process_data.analysis_csv)

@@ -15,7 +15,7 @@ def face_detection():
     pipeline = DetectMiniXceptionFER([args.offset, args.offset])
     camera = Camera(args.camera_id)
     player = VideoPlayer((640, 480), pipeline, camera)
-    player.run()
+    player.record()
 
 
 if __name__ == "__main__":

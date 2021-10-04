@@ -9,6 +9,7 @@ class Camera(object):
     By default this camera uses the openCV functionality.
     It can be inherited to overwrite methods in case another camera API exists.
     """
+
     def __init__(self, device_id=0, name='Camera'):
         # TODO load parameters from camera name. Use ``load`` method.
         self.device_id = device_id
@@ -101,6 +102,8 @@ class VideoPlayer(object):
         # Returns
             Inferences from ``pipeline``.
         """
+
+        print('aaaaaaaaaa')
         if self.camera.is_open() is False:
             raise ValueError('Camera has not started. Call ``start`` method.')
 
@@ -116,6 +119,8 @@ class VideoPlayer(object):
         """Opens camera and starts continuous inference using ``pipeline``,
         until the user presses ``q`` inside the opened window.
         """
+
+        print('aaaaaaaaab')
         self.camera.start()
         while True:
             output = self.step()
@@ -123,12 +128,12 @@ class VideoPlayer(object):
                 continue
             image = resize_image(output['image'], tuple(self.image_size))
             show_image(image, 'inference', wait=False)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            if cv2.waitKey(1) & 0xFF == 13:  # 13 = Enter
                 break
         self.camera.stop()
         cv2.destroyAllWindows()
 
-    def record(self, name='video.avi', fps=20, fourCC='XVID'):
+    def record(self, name='video/video.avi', fps=20, fourCC='DIVX'):
         """Opens camera and records continuous inference using ``pipeline``.
 
         # Arguments
@@ -137,7 +142,9 @@ class VideoPlayer(object):
             fourCC: String. Indicates the four character code of the video.
             e.g. XVID, MJPG, X264.
         """
-        self.start()
+        print('aaaaaaaaac')
+        # self.start()
+        self.camera.start()
         fourCC = cv2.VideoWriter_fourcc(*fourCC)
         writer = cv2.VideoWriter(name, fourCC, fps, self.image_size)
         while True:
@@ -147,9 +154,10 @@ class VideoPlayer(object):
             image = resize_image(output['image'], tuple(self.image_size))
             show_image(image, 'inference', wait=False)
             writer.write(image)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            if cv2.waitKey(1) & 0xFF == 13:  # 13 = Enter
                 break
 
-        self.stop()
+        # self.stop()
+        self.camera.stop()
         writer.release()
         cv2.destroyAllWindows()

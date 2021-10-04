@@ -3,6 +3,8 @@
 #
 import csv
 import glob
+import os
+import shutil
 from _csv import reader
 import numpy as np
 from collections import Counter
@@ -80,8 +82,14 @@ def process_window(data_queue):
 
 # 各ファイルごとにウィンドウ処理を実行，結果をCSV出力
 def do_process_window():
+    # data_filesの初期化
+    rm_file = path + '\\data_set\\analysis_files\\data_files'
+    shutil.rmtree(rm_file)
+    os.makedirs(rm_file)
     # logファイルのコピー
-    glob_file = path + '\\data_set\\log_files\\value_list*.csv'
+    # glob_file = path + '\\data_set\\log_files\\value_list?[13]?.csv'    # 動き　大
+    # glob_file = path + '\\data_set\\log_files\\value_list?[24]?.csv'    # 動き　小
+    glob_file = path + '\\data_set\\log_files\\value_list*.csv'         # 全ファイル
     log_list = glob.glob(glob_file)
     for file_name in log_list:
         with open(file_name, 'r') as f:

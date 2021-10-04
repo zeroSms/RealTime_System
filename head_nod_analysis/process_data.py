@@ -10,7 +10,7 @@ import pandas as pd
 from . import add_data, get_feature, setup_variable, stop
 
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, classification_report
 
 analysis_csv = [setup_variable.analysis_columns]  # windowデータの追加
 answer_list = []  # 正解データリスト（windowごと）
@@ -80,6 +80,8 @@ def Realtime_analysis():
             feature_list = []
 
     print(realtime_pred)
+    print(answer_list)
     test_y = pd.Series(data=answer_list)
     y_pred = pd.Series(data=realtime_pred)
-    print(accuracy_score(test_y, y_pred))
+    # print(accuracy_score(test_y, y_pred))
+    print(classification_report(test_y, y_pred, target_names=['others', 'nod', 'shake']))

@@ -16,6 +16,12 @@ feature_columns.extend([('min_' + name) for name in setup_variable.axis_columns]
 feature_columns.extend([('var_' + name) for name in setup_variable.axis_columns])
 # 中央値
 feature_columns.extend([('median_' + name) for name in setup_variable.axis_columns])
+# 第一四分位
+feature_columns.extend([('per25_' + name) for name in setup_variable.axis_columns])
+# 第三四分位
+feature_columns.extend([('per75_' + name) for name in setup_variable.axis_columns])
+# 四分位範囲
+feature_columns.extend([('per_range_' + name) for name in setup_variable.axis_columns])
 # 二乗平均平方根
 feature_columns.extend([('RMS_' + name) for name in setup_variable.axis_columns])
 
@@ -41,10 +47,19 @@ def get_feature(window):
     # 中央値
     feature_list_mini.extend(np.median(df.values, axis=0))
 
+    # 第一四分位
+    per_25 = np.percentile(df.values, 25, axis=0)
+    feature_list_mini.extend(per_25)
+
+    # 第三四分位
+    per_75 = np.percentile(df.values, 75, axis=0)
+    feature_list_mini.extend(per_75)
+
+    # 四分位範囲
+    feature_list_mini.extend(per_75-per_25)
+
     # 二乗平均平方根
     square = np.square(df.values)
     feature_list_mini.extend(np.sqrt(np.mean(square, axis=0)))
 
     return feature_list_mini
-
-
