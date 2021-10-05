@@ -67,7 +67,7 @@ def Realtime_analysis():
     clf = RandomForestClassifier(max_depth=30, n_estimators=30, random_state=42)
     clf.fit(train_x, train_y)
 
-    host = socket.gethostname()  # サーバーのホスト名
+    host = '192.168.2.111'  # サーバーのホスト名
     port = 50000  # 49152~65535
 
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # オブジェクトの作成をします
