@@ -2,10 +2,10 @@ import socket
 
 
 def client():
-    host = socket.gethostname()  # お使いのサーバーのホスト名を入れます
+    host = socket.gethostname()  # サーバーのホスト名
     print(host)
     print(socket.gethostbyname(host))
-    port = 50000  # 適当なPORTを指定してあげます
+    port = 50000  # 49152~65535
 
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # オブジェクトの作成をします
 
@@ -17,7 +17,7 @@ def client():
 
     response = client.recv(4096)  # レシーブは適当な2の累乗にします（大きすぎるとダメ）
 
-    print(response)
+    print(str(response).replace('b', ''))
 
 
 # ================================= メイン関数　実行 ================================ #

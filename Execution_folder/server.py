@@ -2,8 +2,8 @@ import socket
 
 
 def server():
-    host = socket.gethostname()  # お使いのサーバーのホスト名を入れます
-    port = 50000  # クライアントで設定したPORTと同じもの指定してあげます
+    host = socket.gethostname()  # サーバーのホスト名
+    port = 50000  # 49152~65535
 
     serversock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serversock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -16,11 +16,12 @@ def server():
     while True:
         rcvmsg = clientsock.recv(1024)
         print('Received -> %s' % (rcvmsg))
-        if rcvmsg == '':
+        if rcvmsg == b'':
             break
         print('Type message...')
-        s_msg = input().replace('b', '').encode('utf-8')
-        if s_msg == '':
+        s_msg = input().encode('utf-8')
+        print(s_msg)
+        if s_msg == b'':
             break
         print('Wait...')
 
