@@ -85,9 +85,9 @@ NAME = 1
 def process_window():
     global face_list
     while True:
-        if len(face_list) == 0:
+        if len(face_list[SCORE]) == 0:
             face_list = [[], []]
-            return [0.0, "neutral"]
+            return ["neutral"]
         else:
             max_name = [face_list[NAME][i] for i, v in enumerate(face_list[SCORE]) if v == max(face_list[SCORE])]
             face_list = [[], []]

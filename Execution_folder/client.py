@@ -3,7 +3,7 @@ import pickle
 
 
 def client():
-    host = socket.gethostname()  # サーバーのホスト名
+    host = '192.168.2.111'  # サーバーのホスト名
     print(host)
     print(socket.gethostbyname(host))
     port = 50000  # 49152~65535

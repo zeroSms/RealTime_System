@@ -5,6 +5,8 @@
 import numpy as np
 import collections
 import pandas as pd
+import socket
+import pickle
 
 # 自作ライブラリ
 from . import add_data, get_feature, setup_variable, stop
@@ -65,10 +67,15 @@ def Realtime_analysis():
     clf = RandomForestClassifier(max_depth=30, n_estimators=30, random_state=42)
     clf.fit(train_x, train_y)
 
+    host = socket.gethostname()  # サーバーのホスト名
+    port = 50000  # 49152~65535
+
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # オブジェクトの作成をします
+    client.connect((host, port))  # これでサーバーに接続します
+
     while stop.stop_flg:
         window = []
         window = add_data.sensor.process_window()
-        print(window)
         if window:
             window_num += 1
 
@@ -86,7 +93,10 @@ def Realtime_analysis():
             # 判定された表情の出力
             pred_face = CML.process_window()
             print(pred_face)
-            push_server = [y_pred, pred_face]
+            push_server = [y_pred[0], pred_face]
+
+            massage = pickle.dumps(push_server)
+            client.send(massage)  # 適当なデータを送信します（届く側にわかるように）
 
     print(realtime_pred)
     print(answer_list)
