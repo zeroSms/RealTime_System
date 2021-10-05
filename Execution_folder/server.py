@@ -1,4 +1,5 @@
 import socket
+import pickle
 
 
 def server():
@@ -15,17 +16,16 @@ def server():
 
     while True:
         rcvmsg = clientsock.recv(1024)
-        print('Received -> %s' % (rcvmsg))
+        print('Received -> %s' % pickle.loads(rcvmsg))
         if rcvmsg == b'':
             break
-        print('Type message...')
-        s_msg = input().encode('utf-8')
-        print(s_msg)
-        if s_msg == b'':
-            break
-        print('Wait...')
-
-        clientsock.sendall(s_msg)  # メッセージを返します
+        # print('Type message...')
+        # s_msg = input().encode('utf-8')
+        # print(s_msg)
+        # if s_msg == b'':
+        #     break
+        # print('Wait...')
+        # clientsock.sendall(s_msg)  # メッセージを返します
     clientsock.close()
 
 

@@ -18,7 +18,6 @@ def face_detection():
     camera = Camera(args.camera_id)
     player = VideoPlayer((640, 480), pipeline, camera)
     player.record()
-    print(FS.process_window())
 
 
 if __name__ == "__main__":

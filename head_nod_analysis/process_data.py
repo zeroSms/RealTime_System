@@ -53,8 +53,9 @@ def ProcessData():
 
 
 # 測定したデータを処理する関数
+push_server = []
 def Realtime_analysis():
-    global window_num, feature_list
+    global window_num, feature_list, push_server
     filename = path + '\\data_set\\analysis_files\\feature_files\\feature_list1.csv'
     train_x = pd.read_csv(filename, header=None)
     filename = path + '\\data_set\\analysis_files\\answer_files\\answer_list1.csv'
@@ -65,7 +66,9 @@ def Realtime_analysis():
     clf.fit(train_x, train_y)
 
     while stop.stop_flg:
+        window = []
         window = add_data.sensor.process_window()
+        print(window)
         if window:
             window_num += 1
 
@@ -76,14 +79,17 @@ def Realtime_analysis():
             feature_list.append(get_feature.get_feature(window))
             X = pd.DataFrame(feature_list)
             y_pred = clf.predict(X)
-            print(y_pred)  # 判定された行動の出力
-            # print(CML.process_window())
+            print(y_pred, answer_list[-1])  # 判定された行動の出力
             realtime_pred.extend(y_pred)
             feature_list = []
+
+            # 判定された表情の出力
+            pred_face = CML.process_window()
+            print(pred_face)
+            push_server = [y_pred, pred_face]
 
     print(realtime_pred)
     print(answer_list)
     test_y = pd.Series(data=answer_list)
     y_pred = pd.Series(data=realtime_pred)
-    # print(accuracy_score(test_y, y_pred))
     print(classification_report(test_y, y_pred, target_names=['others', 'nod', 'shake']))

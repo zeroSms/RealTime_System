@@ -81,7 +81,7 @@ SCORE = 0
 NAME = 1
 
 
-# ウィンドウ処理を行う
+# 表情のウィンドウ処理を行う
 def process_window():
     global face_list
     while True:
@@ -166,12 +166,11 @@ class VideoPlayer(object):
             output = self.step()
             if output is None:
                 continue
+            # 表情スコアの出力
             if len(output['boxes2D']) != 0:
                 box2D = output['boxes2D'][0]
                 face_list[SCORE].append(box2D.score)
                 face_list[NAME].append(box2D.class_name)
-            # else:
-            #     face_list.append(0)
             image = resize_image(output['image'], tuple(self.image_size))
             show_image(image, 'inference', wait=False)
             writer.write(image)
