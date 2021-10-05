@@ -6,6 +6,9 @@ def server():
     host = socket.gethostname()  # サーバーのホスト名
     port = 50000  # 49152~65535
 
+    print(host)
+    print(socket.gethostbyname(host))
+
     serversock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serversock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     serversock.bind((host, port))  # IPとPORTを指定してバインドします
