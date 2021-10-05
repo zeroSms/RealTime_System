@@ -76,6 +76,24 @@ class Camera(object):
         raise NotImplementedError
 
 
+face_list = [[], []]
+SCORE = 0
+NAME = 1
+
+
+# ウィンドウ処理を行う
+def process_window():
+    global face_list
+    while True:
+        if len(face_list) == 0:
+            face_list = [[], []]
+            return [0.0, "neutral"]
+        else:
+            max_name = [face_list[NAME][i] for i, v in enumerate(face_list[SCORE]) if v == max(face_list[SCORE])]
+            face_list = [[], []]
+            return max_name
+
+
 class VideoPlayer(object):
     """Performs visualization inferences in a real-time video.
 
@@ -103,7 +121,6 @@ class VideoPlayer(object):
             Inferences from ``pipeline``.
         """
 
-        print('aaaaaaaaaa')
         if self.camera.is_open() is False:
             raise ValueError('Camera has not started. Call ``start`` method.')
 
@@ -120,7 +137,6 @@ class VideoPlayer(object):
         until the user presses ``q`` inside the opened window.
         """
 
-        print('aaaaaaaaab')
         self.camera.start()
         while True:
             output = self.step()
@@ -142,8 +158,7 @@ class VideoPlayer(object):
             fourCC: String. Indicates the four character code of the video.
             e.g. XVID, MJPG, X264.
         """
-        print('aaaaaaaaac')
-        # self.start()
+        global face_list
         self.camera.start()
         fourCC = cv2.VideoWriter_fourcc(*fourCC)
         writer = cv2.VideoWriter(name, fourCC, fps, self.image_size)
@@ -151,13 +166,18 @@ class VideoPlayer(object):
             output = self.step()
             if output is None:
                 continue
+            if len(output['boxes2D']) != 0:
+                box2D = output['boxes2D'][0]
+                face_list[SCORE].append(box2D.score)
+                face_list[NAME].append(box2D.class_name)
+            # else:
+            #     face_list.append(0)
             image = resize_image(output['image'], tuple(self.image_size))
             show_image(image, 'inference', wait=False)
             writer.write(image)
             if cv2.waitKey(1) & 0xFF == 13:  # 13 = Enter
                 break
 
-        # self.stop()
         self.camera.stop()
         writer.release()
         cv2.destroyAllWindows()

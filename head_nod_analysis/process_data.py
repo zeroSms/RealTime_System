@@ -8,6 +8,7 @@ import pandas as pd
 
 # 自作ライブラリ
 from . import add_data, get_feature, setup_variable, stop
+from paz.backend import camera as CML
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
@@ -76,6 +77,7 @@ def Realtime_analysis():
             X = pd.DataFrame(feature_list)
             y_pred = clf.predict(X)
             print(y_pred)  # 判定された行動の出力
+            # print(CML.process_window())
             realtime_pred.extend(y_pred)
             feature_list = []
 

@@ -16,6 +16,7 @@ class AugmentBoxes(SequentialProcessor):
     # Arguments
         mean: List of three elements used to fill empty image spaces.
     """
+
     def __init__(self, mean=pr.BGR_IMAGENET_MEAN):
         super(AugmentBoxes, self).__init__()
         self.add(pr.ToImageBoxCoordinates())
@@ -36,9 +37,10 @@ class PreprocessBoxes(SequentialProcessor):
         variances: List of two floats indicating variances to be encoded
             for encoding bounding boxes.
     """
+
     def __init__(self, num_classes, prior_boxes, IOU, variances):
         super(PreprocessBoxes, self).__init__()
-        self.add(pr.MatchBoxes(prior_boxes, IOU),)
+        self.add(pr.MatchBoxes(prior_boxes, IOU), )
         self.add(pr.EncodeBoxes(prior_boxes, variances))
         self.add(pr.BoxClassToOneHotVector(num_classes))
 
@@ -59,6 +61,7 @@ class AugmentDetection(SequentialProcessor):
         variances: List of two floats indicating variances to be encoded
             for encoding bounding boxes.
     """
+
     def __init__(self, prior_boxes, split=pr.TRAIN, num_classes=21, size=300,
                  mean=pr.BGR_IMAGENET_MEAN, IOU=.5,
                  variances=[0.1, 0.1, 0.2, 0.2]):
@@ -97,6 +100,7 @@ class DetectSingleShot(Processor):
         mean: List of three elements indicating the per channel mean.
         draw: Boolean. If ``True`` prediction are drawn in the returned image.
     """
+
     def __init__(self, model, class_names, score_thresh, nms_thresh,
                  mean=pr.BGR_IMAGENET_MEAN, variances=[0.1, 0.1, 0.2, 0.2],
                  draw=True):
@@ -160,6 +164,7 @@ class SSD512COCO(DetectSingleShot):
         - [SSD: Single Shot MultiBox
             Detector](https://arxiv.org/abs/1512.02325)
     """
+
     def __init__(self, score_thresh=0.60, nms_thresh=0.45, draw=True):
         model = SSD512()
         names = get_class_names('COCO')
@@ -193,6 +198,7 @@ class SSD512YCBVideo(DetectSingleShot):
 
 
     """
+
     def __init__(self, score_thresh=0.60, nms_thresh=0.45, draw=True):
         names = get_class_names('YCBVideo')
         model = SSD512(weights='YCBVideo', num_classes=len(names))
@@ -228,6 +234,7 @@ class SSD300VOC(DetectSingleShot):
         - [SSD: Single Shot MultiBox
             Detector](https://arxiv.org/abs/1512.02325)
     """
+
     def __init__(self, score_thresh=0.60, nms_thresh=0.45, draw=True):
         model = SSD300()
         names = get_class_names('VOC')
@@ -259,6 +266,7 @@ class SSD300FAT(DetectSingleShot):
         inferences and a list of ``paz.abstract.messages.Boxes2D``.
 
     """
+
     def __init__(self, score_thresh=0.60, nms_thresh=0.45, draw=True):
         model = SSD300(22, 'FAT', 'FAT')
         names = get_class_names('FAT')
@@ -278,6 +286,7 @@ class DetectHaarCascade(Processor):
     # Returns
         A function for predicting bounding box detections.
     """
+
     def __init__(self, detector, class_names=None, colors=None, draw=True):
         super(DetectHaarCascade, self).__init__()
         self.detector = detector
@@ -322,6 +331,7 @@ class HaarCascadeFrontalFace(DetectHaarCascade):
         inferences and a list of ``paz.abstract.messages.Boxes2D``.
 
     """
+
     def __init__(self, class_name='Face', color=[0, 255, 0], draw=True):
         self.model = HaarCascadeDetector('frontalface_default', class_arg=0)
         super(HaarCascadeFrontalFace, self).__init__(
@@ -357,6 +367,7 @@ class DetectMiniXceptionFER(Processor):
        - [Real-time Convolutional Neural Networks for Emotion and
             Gender Classification](https://arxiv.org/abs/1710.07557)
     """
+
     def __init__(self, offsets=[0, 0], colors=EMOTION_COLORS):
         super(DetectMiniXceptionFER, self).__init__()
         self.offsets = offsets
@@ -385,9 +396,9 @@ class DetectMiniXceptionFER(Processor):
         cropped_images = self.crop(image, boxes2D)
         for cropped_image, box2D in zip(cropped_images, boxes2D):
             predictions = self.classify(cropped_image)
-            print(predictions)
             box2D.class_name = predictions['class_name']
             box2D.score = np.amax(predictions['scores'])
+        # print(boxes2D)
         image = self.draw(image, boxes2D)
         return self.wrap(image, boxes2D)
 
@@ -458,6 +469,7 @@ class DetectFaceKeypointNet2D32(DetectKeypoints2D):
         inferences and a list of ``paz.abstract.messages.Boxes2D``.
 
     """
+
     def __init__(self, offsets=[0, 0], radius=3):
         detect = HaarCascadeFrontalFace(draw=False)
         estimate_keypoints = FaceKeypointNet2D32(draw=False)
