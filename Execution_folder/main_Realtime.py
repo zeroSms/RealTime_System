@@ -43,7 +43,7 @@ def main():
 
     loop = asyncio.new_event_loop()
     thread_1 = threading.Thread(target=add_data.AddData, args=(address, loop,))
-    thread_2 = threading.Thread(target=process_data.Realtime_analysis)
+    thread_2 = threading.Thread(target=process_data.Realtime_analysis, args=(False, False))
     # thread_3 = threading.Thread(target=analysis_data.AnalysisData)
     thread_4 = threading.Thread(target=Stop)
     thread_5 = threading.Thread(target=Label)

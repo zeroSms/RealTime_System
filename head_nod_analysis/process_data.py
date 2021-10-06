@@ -23,6 +23,7 @@ realtime_pred = []
 
 # ================================= パスの取得 ================================ #
 path = setup_variable.path
+server_address = '192.168.2.111'
 
 
 # ============================ ラベル整形スレッド ============================== #
@@ -56,8 +57,11 @@ def ProcessData():
 
 # 測定したデータを処理する関数
 push_server = []
-def Realtime_analysis():
-    global window_num, feature_list, push_server
+check_num = 0
+
+
+def Realtime_analysis(to_server=False, get_face=False):
+    global window_num, feature_list, push_server, check_num
     filename = path + '\\data_set\\analysis_files\\feature_files\\feature_list1.csv'
     train_x = pd.read_csv(filename, header=None)
     filename = path + '\\data_set\\analysis_files\\answer_files\\answer_list1.csv'
@@ -67,11 +71,12 @@ def Realtime_analysis():
     clf = RandomForestClassifier(max_depth=30, n_estimators=30, random_state=42)
     clf.fit(train_x, train_y)
 
-    host = '192.168.2.111'  # サーバーのホスト名
-    port = 50000  # 49152~65535
+    if to_server:
+        host = server_address  # サーバーのホスト名
+        port = 50000  # 49152~65535
 
-    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # オブジェクトの作成をします
-    client.connect((host, port))  # これでサーバーに接続します
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # オブジェクトの作成をします
+        client.connect((host, port))  # これでサーバーに接続します
 
     while stop.stop_flg:
         window = []
@@ -91,13 +96,17 @@ def Realtime_analysis():
             feature_list = []
 
             # 判定された表情の出力
-            pred_face = CML.process_window()
-            print(pred_face)
-            push_server = [y_pred[0], pred_face]
+            if get_face:
+                pred_face = CML.process_window()
+                print(pred_face)
 
-            massage = pickle.dumps(push_server)
-            client.send(massage)  # 適当なデータを送信します（届く側にわかるように）
-
+            # サーバーへの送信
+            if to_server:
+                push_server = [y_pred[0], pred_face]
+                massage = pickle.dumps(push_server)
+                client.send(massage)  # 適当なデータを送信します（届く側にわかるように）
+            check_num += 1
+    print(check_num)
     print(realtime_pred)
     print(answer_list)
     test_y = pd.Series(data=answer_list)

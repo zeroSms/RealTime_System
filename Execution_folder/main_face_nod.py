@@ -46,7 +46,7 @@ def main():
     # 頭の動きのセンシング　スレッド開始
     loop = asyncio.new_event_loop()
     thread_1 = threading.Thread(target=add_data.AddData, args=(address, loop,))
-    thread_2 = threading.Thread(target=process_data.Realtime_analysis)
+    thread_2 = threading.Thread(target=process_data.Realtime_analysis, args=(False, True))
     # thread_3 = threading.Thread(target=face_demo.face_detection())
     thread_4 = threading.Thread(target=Stop)
     thread_5 = threading.Thread(target=Label)
