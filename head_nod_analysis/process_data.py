@@ -41,7 +41,7 @@ def label_shape(window):
         answer_list.append(0)
     window_T[0] = [window_num] * len(window)  # window_IDの追加
 
-    return window_T.T
+    return window_T.T, answer_list[-1]
 
 
 # ============================ データ処理スレッド ============================== #
@@ -85,13 +85,14 @@ def Realtime_analysis(to_server=False, get_face=False):
             window_num += 1
 
             # ウィンドウラベルの付与，正解ラベルデータの作成
-            analysis_csv.extend(label_shape(window))
+            result_window, answer_num = label_shape(window)
+            analysis_csv.extend(result_window)
 
             # リアルタイム行動分析
             feature_list.append(get_feature.get_feature(window))
             X = pd.DataFrame(feature_list)
             y_pred = clf.predict(X)
-            print(y_pred, answer_list[-1])  # 判定された行動の出力
+            print(y_pred, answer_num)  # 判定された行動の出力
             realtime_pred.extend(y_pred)
             feature_list = []
 

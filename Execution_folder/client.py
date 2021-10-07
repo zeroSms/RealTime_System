@@ -4,7 +4,7 @@ import pickle
 
 def client():
     host = '172.29.64.1'  # サーバーのホスト名
-    port = 50000  # 49152~65535
+    port = 50001  # 49152~65535
 
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # オブジェクトの作成をします
     client.connect((host, port))  # これでサーバーに接続します
