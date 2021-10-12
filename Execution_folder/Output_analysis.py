@@ -14,16 +14,18 @@ import pandas as pd
 from head_nod_analysis import setup_variable, get_feature
 
 # 分類モデル
+from sklearn.feature_selection import RFE, RFECV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn.metrics import classification_report
+from sklearn.decomposition import PCA
 
 # 図の描画
 import matplotlib.pyplot as plt
 from head_nod_analysis import view_Confusion_matrix
 import seaborn as sns
-sns.set_style('whitegrid', {'linestyle.grid': '--'})
 
+sns.set_style('whitegrid', {'linestyle.grid': '--'})
 
 analysis_csv = [setup_variable.analysis_columns]  # windowデータの追加
 answer_list = []  # 正解データリスト（windowごと）
@@ -31,6 +33,7 @@ feature_list = []  # 特徴量抽出データ
 
 # ================================= パスの取得 ================================ #
 path = setup_variable.path
+
 
 # ============================ データ整形スレッド ============================== #
 def label_shape(window):
@@ -87,9 +90,7 @@ def do_process_window():
     shutil.rmtree(rm_file)
     os.makedirs(rm_file)
     # logファイルのコピー
-    # glob_file = path + '\\data_set\\log_files\\value_list?[13]?.csv'    # 動き　大
-    # glob_file = path + '\\data_set\\log_files\\value_list?[24]?.csv'    # 動き　小
-    glob_file = path + '\\data_set\\log_files\\value_list*.csv'         # 全ファイル
+    glob_file = path + '\\data_set\\log_files\\value_list*.csv'  # 全ファイル
     log_list = glob.glob(glob_file)
     for file_name in log_list:
         with open(file_name, 'r') as f:
@@ -116,13 +117,12 @@ def do_process_window():
 
 
 # ================================= メイン関数　実行 ================================ #
-FOLD = setup_variable.FOLD
-score_ave_train = []
-score_ave_test = []
+FOLD = setup_variable.FOLD  # 交差検証分割数
 importance_ave = []
 sum_test = []
 sum_pred = []
 score_dict = {}
+PCA_bar = []
 
 if __name__ == '__main__':
     ex_num = input('実験番号：')
@@ -147,20 +147,40 @@ if __name__ == '__main__':
         writer.writerows(feature_list)
 
     # 正解データ取得
-    X = np.array(feature_list)
-    filename = path + '\\data_set\\analysis_files\\answer_files\\answer_list' + ex_num + '.csv'
-    y = np.loadtxt(filename, delimiter=',', dtype='int')
-    y = pd.Series(data=y)
+    X = pd.DataFrame(feature_list, columns=get_feature.feature_columns)
+    y = pd.Series(data=np.array(answer_list))
 
-    clf = RandomForestClassifier(max_depth=30, n_estimators=100, random_state=42)
+    clf = RandomForestClassifier(max_depth=30, n_estimators=30, random_state=42)
+
+    print('aaaaa')
+    min_features_select = 10
+    selector = RFECV(clf, min_features_to_select=min_features_select, cv=10)
+    # selector = RFE(clf, n_features_to_select=min_features_select)
+    X_new = pd.DataFrame(selector.fit_transform(X, y),
+                         columns=X.columns.values[selector.get_support()])
+    result = pd.DataFrame(selector.get_support(), index=X.columns.values, columns=['False: dropped'])
+    result['ranking'] = selector.ranking_
+    result.to_csv('result1.csv')
+    print('bbbbbbbbb')
+
+    # Plot number of features VS. cross-validation scores
+    plt.figure()
+    plt.xlabel("Number of features selected")
+    plt.ylabel("Cross validation score (nb of correct classifications)")
+    plt.plot(range(min_features_select,
+                   len(selector.grid_scores_) + min_features_select),
+             selector.grid_scores_)
+    plt.show()
 
     # 層化k分割交差検証
     skf = StratifiedKFold(n_splits=FOLD)
+    X = X_new.values
     for train_id, test_id in skf.split(X, y):
         train_x, test_x = X[train_id], X[test_id]
         train_y, test_y = y[train_id], y[test_id]
 
         clf.fit(train_x, train_y)
+
         # テストセットの精度検証
         pred_test = clf.predict(test_x)
         test_score = classification_report(test_y, pred_test, target_names=['others', 'nod', 'shake'], output_dict=True)
@@ -178,12 +198,8 @@ if __name__ == '__main__':
                     if not (k2 in score_dict[k1]):  score_dict[k1][k2] = 0
                     score_dict[k1][k2] += float(test_score[k1].get(k2, 0))
 
-
-        # score_ave_test.append(accuracy_test)
         importance_ave.append(clf.feature_importances_.tolist())
 
-        # print('正解データ：　{}'.format(test_y.values))
-        # print('予測データ：　{}'.format(y_pred))
         sum_test.extend(test_y)
         sum_pred.extend(pred_test)
 
@@ -201,7 +217,7 @@ if __name__ == '__main__':
     print(df)
 
     # ランダムフォレストの説明変数の重要度をデータフレーム化
-    fea_rf_imp = pd.DataFrame({'imp': np.mean(np.array(importance_ave), axis=0), 'col': get_feature.feature_columns})
+    fea_rf_imp = pd.DataFrame({'imp': np.mean(np.array(importance_ave), axis=0), 'col': X_new.columns})
     fea_rf_imp = fea_rf_imp.sort_values(by='imp', ascending=False)
 
     # ランダムフォレストの重要度を可視化
@@ -211,3 +227,4 @@ if __name__ == '__main__':
     plt.ylabel('Features', fontsize=18)
     plt.xlabel('Importance', fontsize=18)
     plt.show()
+

@@ -9,11 +9,15 @@ import socket
 import pickle
 
 # 自作ライブラリ
+from sklearn.decomposition import PCA
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+
 from . import add_data, get_feature, setup_variable, stop
 from paz.backend import camera as CML
 
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report
 
 analysis_csv = [setup_variable.analysis_columns]  # windowデータの追加
 answer_list = []  # 正解データリスト（windowごと）
@@ -68,6 +72,12 @@ def Realtime_analysis(to_server=False, get_face=False):
     y = np.loadtxt(filename, delimiter=",", dtype='int')
     train_y = pd.Series(data=y)
 
+    # 主成分分析 (PCA)
+    pca = PCA(0.99)
+    pca.fit(train_x)
+    train_x = pca.transform(train_x)
+
+    # ランダムフォレスト
     clf = RandomForestClassifier(max_depth=30, n_estimators=30, random_state=42)
     clf.fit(train_x, train_y)
 
@@ -90,8 +100,11 @@ def Realtime_analysis(to_server=False, get_face=False):
 
             # リアルタイム行動分析
             feature_list.append(get_feature.get_feature(window))
-            X = pd.DataFrame(feature_list)
-            y_pred = clf.predict(X)
+            test_x = pd.DataFrame(feature_list)
+
+            test_x = pca.transform(test_x)
+
+            y_pred = clf.predict(test_x)
             print(y_pred, answer_num)  # 判定された行動の出力
             realtime_pred.extend(y_pred)
             feature_list = []
