@@ -7,14 +7,15 @@ import collections
 import pandas as pd
 import socket
 import pickle
+import pyautogui
 
-# 自作ライブラリ
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 
+# 自作ライブラリ
 from . import add_data, get_feature, setup_variable, stop
 from paz.backend import camera as CML
 
@@ -106,6 +107,7 @@ def Realtime_analysis(to_server=False, get_face=False):
 
             y_pred = clf.predict(test_x)
             print(y_pred, answer_num)  # 判定された行動の出力
+            pyautogui.press(str(y_pred[0]))
             realtime_pred.extend(y_pred)
             feature_list = []
 

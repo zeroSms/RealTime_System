@@ -9,8 +9,8 @@ action_num = 0
 TimeOver = 4 * 10
 
 
-def wait_10():
-    time.sleep(10)
+def wait():
+    time.sleep(15)
 
 
 class PopUp:
@@ -37,13 +37,14 @@ class PopUp:
 if __name__ == '__main__':
     rand_action = random.sample(action_list, k=4)
     popup = PopUp()
+    time.sleep(5)
 
-    for i in range(4):
-        action_num += 1
-        winsound.Beep(800, 100)
-        popup.Action(rand_action[i])
-        if action_num == TimeOver:  break
-        wait_10()
+    while action_num != TimeOver:
+        for i in range(4):
+            action_num += 1
+            winsound.Beep(800, 100)
+            popup.Action(rand_action[i])
+            wait()
 
     winsound.Beep(400, 100)
     popup.End()

@@ -6,7 +6,7 @@ import csv
 import asyncio
 
 # 自作ライブラリ
-from head_nod_analysis import add_data, process_data, get_address, setup_variable
+from head_nod_analysis import add_data, process_data, get_address, setup_variable, view_Realtime_head
 from head_nod_analysis.stop import Stop
 from head_nod_analysis.enter_label import Label
 
@@ -44,7 +44,7 @@ def main():
     loop = asyncio.new_event_loop()
     thread_1 = threading.Thread(target=add_data.AddData, args=(address, loop,))
     thread_2 = threading.Thread(target=process_data.Realtime_analysis, args=(False, False))
-    # thread_3 = threading.Thread(target=analysis_data.AnalysisData)
+    # thread_3 = threading.Thread(target=view_Realtime_head.view_action())
     thread_4 = threading.Thread(target=Stop)
     thread_5 = threading.Thread(target=Label)
 
@@ -54,7 +54,7 @@ def main():
     thread_4.start()
     thread_5.start()
     print('start!')
-
+    view_Realtime_head.view_action()
     # スレッドの待ち合わせ処理
     thread_list = threading.enumerate()
     thread_list.remove(threading.main_thread())

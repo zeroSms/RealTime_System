@@ -41,9 +41,9 @@ def label_shape(window):
     label_num = Counter(window_T[0])  # labelごとの個数を計算
 
     # 正解データファイルの出力
-    if label_num['nod'] > len(window) / 2:
+    if label_num['nod'] > int(len(window) * 0.3):
         answer_list.append(1)
-    elif label_num['shake'] > len(window) / 2:
+    elif label_num['shake'] > int(len(window) * 0.3):
         answer_list.append(2)
     else:
         answer_list.append(0)
@@ -152,7 +152,7 @@ if __name__ == '__main__':
 
     clf = RandomForestClassifier(max_depth=30, n_estimators=30, random_state=42)
 
-    print('aaaaa')
+    # 特徴量削減
     min_features_select = 10
     selector = RFECV(clf, min_features_to_select=min_features_select, cv=10)
     # selector = RFE(clf, n_features_to_select=min_features_select)
@@ -161,7 +161,6 @@ if __name__ == '__main__':
     result = pd.DataFrame(selector.get_support(), index=X.columns.values, columns=['False: dropped'])
     result['ranking'] = selector.ranking_
     result.to_csv('result1.csv')
-    print('bbbbbbbbb')
 
     # Plot number of features VS. cross-validation scores
     plt.figure()
