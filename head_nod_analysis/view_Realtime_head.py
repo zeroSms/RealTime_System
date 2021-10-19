@@ -9,7 +9,6 @@ def view_action():
 
     def btn_click(e):
         global index
-        print(e.char)
         index = int(e.char)
         canvas.delete('p1')
         canvas.create_image(320, 213, image=photos[index], tag='p1')

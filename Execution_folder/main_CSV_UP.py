@@ -18,7 +18,7 @@ path = setup_variable.path
 # ================================= CSV出力 ================================ #
 # ログファイル出力
 def getCsv_log(file_num):
-    log_name = path + '/data_set/log_files/value_list' + file_num + '.csv'
+    log_name = path + '/data_set/log_files/main/value_list' + file_num + '.csv'
     with open(log_name, 'w') as f:
         writer = csv.writer(f, lineterminator='\n')
         writer.writerows(add_data.log_data)

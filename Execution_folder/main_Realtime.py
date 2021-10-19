@@ -54,7 +54,9 @@ def main():
     thread_4.start()
     thread_5.start()
     print('start!')
+
     view_Realtime_head.view_action()
+
     # スレッドの待ち合わせ処理
     thread_list = threading.enumerate()
     thread_list.remove(threading.main_thread())
