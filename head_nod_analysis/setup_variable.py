@@ -20,7 +20,7 @@ analysis_columns = ['window_ID', 'timeStamp',
 axis_columns = ['acc_X', 'acc_Y', 'acc_Z',
                 'gyro_X', 'gyro_Y', 'gyro_Z',
                 'acc_xyz']
-
+acc_columns = ['acc_X', 'acc_Y', 'acc_Z', 'acc_xyz']
 gyro_columns = ['gyro_X', 'gyro_Y', 'gyro_Z']
 
 # ウィンドウ単位の処理用定数

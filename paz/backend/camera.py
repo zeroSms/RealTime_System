@@ -3,6 +3,10 @@ import cv2
 from ..backend.image import resize_image, convert_color_space, show_image
 from ..backend.image import BGR2RGB
 
+from head_nod_analysis import setup_variable
+
+# ================================= パスの取得 ================================ #
+path = setup_variable.path
 
 class Camera(object):
     """Camera abstract class.
@@ -149,7 +153,7 @@ class VideoPlayer(object):
         self.camera.stop()
         cv2.destroyAllWindows()
 
-    def record(self, name='video/video.avi', fps=20, fourCC='DIVX'):
+    def record(self, name=path+'/video/video.avi', fps=20, fourCC='DIVX'):
         """Opens camera and records continuous inference using ``pipeline``.
 
         # Arguments

@@ -19,9 +19,9 @@ def view_action():
     canvas = tk.Canvas(root, width=640, height=426, bd=0, highlightthickness=0, relief='ridge')
     canvas.pack(pady=20)
     photos = [
-        tk.PhotoImage(file='キャプチャ0.PNG'),
-        tk.PhotoImage(file='キャプチャ1.PNG'),
-        tk.PhotoImage(file='キャプチャ2.PNG'),
+        tk.PhotoImage(file='../fig/head_neutral.PNG'),
+        tk.PhotoImage(file='../fig/head_nod.PNG'),
+        tk.PhotoImage(file='../fig/head_shake.PNG'),
     ]
     canvas.create_image(320, 213, image=photos[index], tag='p1')
     canvas.bind_all("<KeyPress>", btn_click)

@@ -41,8 +41,6 @@ feature_columns.extend([('FE_' + name) for name in setup_variable.axis_columns])
 
 # Energy
 feature_columns.extend([('En_' + name) for name in setup_variable.axis_columns])
-# DC成分
-feature_columns.extend([('DC_' + name) for name in setup_variable.axis_columns])
 
 
 class Calc_FFT:
@@ -167,12 +165,5 @@ def get_feature(window):
         En = axis_fft[axis].Calc_Energy()
         FFT_En.append(En)
     feature_list_mini.extend(FFT_En)
-
-    # DC成分
-    FFT_DC = []
-    for axis in setup_variable.axis_columns:
-        DC = axis_fft[axis].Calc_DC()
-        FFT_DC.append(DC)
-    feature_list_mini.extend(FFT_DC)
 
     return feature_list_mini

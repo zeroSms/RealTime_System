@@ -11,34 +11,34 @@ from . import setup_variable
 
 feature_columns = []
 # 平均
-feature_columns.extend([('mean_' + name) for name in setup_variable.gyro_columns])
+feature_columns.extend([('mean_' + name) for name in setup_variable.acc_columns])
 # 最大
-feature_columns.extend([('max_' + name) for name in setup_variable.gyro_columns])
+feature_columns.extend([('max_' + name) for name in setup_variable.acc_columns])
 # 最小
-feature_columns.extend([('min_' + name) for name in setup_variable.gyro_columns])
+feature_columns.extend([('min_' + name) for name in setup_variable.acc_columns])
 # 分散
-feature_columns.extend([('var_' + name) for name in setup_variable.gyro_columns])
+feature_columns.extend([('var_' + name) for name in setup_variable.acc_columns])
 # 中央値
-feature_columns.extend([('median_' + name) for name in setup_variable.gyro_columns])
+feature_columns.extend([('median_' + name) for name in setup_variable.acc_columns])
 # 第一四分位
-feature_columns.extend([('per25_' + name) for name in setup_variable.gyro_columns])
+feature_columns.extend([('per25_' + name) for name in setup_variable.acc_columns])
 # 第三四分位
-feature_columns.extend([('per75_' + name) for name in setup_variable.gyro_columns])
+feature_columns.extend([('per75_' + name) for name in setup_variable.acc_columns])
 # 四分位範囲
-feature_columns.extend([('per_range_' + name) for name in setup_variable.gyro_columns])
+feature_columns.extend([('per_range_' + name) for name in setup_variable.acc_columns])
 # 二乗平均平方根
-feature_columns.extend([('RMS_' + name) for name in setup_variable.gyro_columns])
+feature_columns.extend([('RMS_' + name) for name in setup_variable.acc_columns])
 # 相関係数
-feature_columns.extend([('coef_' + name) for name in ['gyro_xy', 'gyro_xz', 'gyro_yz']])
+feature_columns.extend([('coef_' + name) for name in ['acc_xy', 'acc_xz', 'acc_yz']])
 
 # Power Band
-for axis in setup_variable.gyro_columns:
+for axis in setup_variable.acc_columns:
     feature_columns.extend([(name + axis) for name in ['PB0-5', 'PB5-10', 'PB10-15', 'PB15-20', 'PB20-25', 'PB25-30',
                                                        'PB30-35', 'PB35-40', 'PB40-45', 'PB45-50']])
 # Freq_Ent(周波数領域エントロピー)
-feature_columns.extend([('FE_' + name) for name in setup_variable.gyro_columns])
+feature_columns.extend([('FE_' + name) for name in setup_variable.acc_columns])
 # Energy
-feature_columns.extend([('En_' + name) for name in setup_variable.gyro_columns])
+feature_columns.extend([('En_' + name) for name in setup_variable.acc_columns])
 
 
 class Calc_FFT:
@@ -102,7 +102,7 @@ def get_feature(window):
     feature_list_mini = []
     df = pd.DataFrame(window, columns=setup_variable.analysis_columns)
     df = df.drop(['window_ID', 'timeStamp'], axis=1)
-    df = df.drop(['acc_X', 'acc_Y', 'acc_Z', 'acc_xyz'], axis=1)
+    df = df.drop(['gyro_X', 'gyro_Y', 'gyro_Z'], axis=1)
     df = df.astype('float')
 
     # 平均
@@ -127,19 +127,19 @@ def get_feature(window):
     square = np.square(df.values)
     feature_list_mini.extend(np.sqrt(np.mean(square, axis=0)))
 
-    # 相関係数(角速度)
+    # 相関係数(加速度)
     coef = df.iloc[:, 0:3].corr().values
     feature_list_mini.extend([coef[0, 1], coef[0, 2], coef[1, 2]])
     # CrossCorrelation
 
     # 周波数領域
     axis_fft = {}
-    for axis in setup_variable.gyro_columns:
+    for axis in setup_variable.acc_columns:
         axis_fft[axis] = Calc_FFT(df[axis])
 
     # Power Band
     FFT_PB = []
-    for axis in setup_variable.gyro_columns:
+    for axis in setup_variable.acc_columns:
         # 5Hz刻みでパワーバンドを計算
         for i in range(0, 10):
             PB = axis_fft[axis].Calc_PowerBand(i * 5, (i + 1) * 5)
@@ -148,14 +148,14 @@ def get_feature(window):
 
     # Freq Ent(周波数領域エントロピー)
     FFT_FE = []
-    for axis in setup_variable.gyro_columns:
+    for axis in setup_variable.acc_columns:
         FE = axis_fft[axis].Calc_FreqEnt()
         FFT_FE.append(FE)
     feature_list_mini.extend(FFT_FE)
 
     # Energy
     FFT_En = []
-    for axis in setup_variable.gyro_columns:
+    for axis in setup_variable.acc_columns:
         En = axis_fft[axis].Calc_Energy()
         FFT_En.append(En)
     feature_list_mini.extend(FFT_En)

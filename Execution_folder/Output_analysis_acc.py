@@ -11,7 +11,7 @@ from collections import Counter
 import pandas as pd
 
 # 自作ライブラリ
-from head_nod_analysis import setup_variable, get_feature_gyro
+from head_nod_analysis import setup_variable, get_feature_acc
 
 # 分類モデル
 from sklearn.feature_selection import RFE, RFECV
@@ -113,7 +113,7 @@ def do_process_window():
             window = process_window(data_queue)
             if window:
                 # feature_list.append(get_feature.get_feature(window))
-                feature_list.append(get_feature_gyro.get_feature(window))
+                feature_list.append(get_feature_acc.get_feature(window))
                 analysis_csv.extend(label_shape(window))
 
 
@@ -130,7 +130,7 @@ if __name__ == '__main__':
     feature_check = input('特徴量選択[y/n]：')
 
     # Resultの初期化
-    make_file = path + '\\Result\\feature_gyro' + str(ex_num)
+    make_file = path + '\\Result\\feature_acc' + str(ex_num)
     if os.path.exists(make_file):
         shutil.rmtree(make_file)
     os.makedirs(make_file)
@@ -157,7 +157,7 @@ if __name__ == '__main__':
         writer.writerows(feature_list)
 
     # 正解データ取得
-    X = pd.DataFrame(feature_list, columns=get_feature_gyro.feature_columns)
+    X = pd.DataFrame(feature_list, columns=get_feature_acc.feature_columns)
     y = pd.Series(data=np.array(answer_list))
 
     clf = RandomForestClassifier(max_depth=30, n_estimators=30, random_state=42)

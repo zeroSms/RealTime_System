@@ -92,7 +92,7 @@ def do_process_window():
     os.makedirs(rm_file)
     # logファイルのコピー
     # glob_file = path + '\\data_set\\log_files\\100Hz\\value_list*.csv'  # 全ファイル
-    glob_file = path + '\\data_set\\log_files\\test\\value_list*.csv'  # 全ファイル
+    glob_file = path + '\\data_set\\log_files\\main\\value_list*.csv'  # 全ファイル
     log_list = glob.glob(glob_file)
     for file_name in log_list:
         with open(file_name, 'r') as f:
@@ -129,6 +129,7 @@ PCA_bar = []
 
 if __name__ == '__main__':
     ex_num = input('実験番号：')
+    feature_check = input('特徴量選択[y/n]：')
 
     # Resultの初期化
     make_file = path + '\\Result\\feature' + str(ex_num)
@@ -158,40 +159,40 @@ if __name__ == '__main__':
         writer.writerows(feature_list)
 
     # 正解データ取得
-    # X = pd.DataFrame(feature_list, columns=get_feature.feature_columns)
     X = pd.DataFrame(feature_list, columns=get_feature.feature_columns)
     y = pd.Series(data=np.array(answer_list))
 
     clf = RandomForestClassifier(max_depth=30, n_estimators=30, random_state=42)
 
-    # # 特徴量削減
-    # min_features_select = 10
-    # selector = RFECV(clf, min_features_to_select=min_features_select, cv=10)
-    # # selector = RFE(clf, n_features_to_select=min_features_select)
-    # X_new = pd.DataFrame(selector.fit_transform(X, y),
-    #                      columns=X.columns.values[selector.get_support()])
-    # print(len(X.columns.values[selector.get_support()]))
-    # result = pd.DataFrame(selector.get_support(), index=X.columns.values, columns=['False: dropped'])
-    # result['ranking'] = selector.ranking_
-    # result.to_csv(make_file + '\\feature_rank' + str(ex_num) + '.csv')
-    #
-    # # Plot number of features VS. cross-validation scores
-    # fig = plt.figure()
-    # plt.xlabel("Number of features selected")
-    # plt.ylabel("Cross validation score (nb of correct classifications)")
-    # plt.plot(range(min_features_select,
-    #                len(selector.grid_scores_) + min_features_select),
-    #          selector.grid_scores_)
-    # fig.savefig(make_file + '\\features_score' + str(ex_num) + '.png')
-    # X = X_new.values
-    X_label = X
-    X = X.values
+    if feature_check == 'y':
+        # 特徴量削減
+        min_features_select = 10
+        selector = RFECV(clf, min_features_to_select=min_features_select, cv=10)
+        # selector = RFE(clf, n_features_to_select=min_features_select)
+        X_new = pd.DataFrame(selector.fit_transform(X, y),
+                             columns=X.columns.values[selector.get_support()])
+        print(len(X.columns.values[selector.get_support()]))
+        result = pd.DataFrame(selector.get_support(), index=X.columns.values, columns=['False: dropped'])
+        result['ranking'] = selector.ranking_
+        result.to_csv(make_file + '\\feature_rank' + str(ex_num) + '.csv')
+
+        # Plot number of features VS. cross-validation scores
+        fig = plt.figure()
+        plt.xlabel("Number of features selected")
+        plt.ylabel("Cross validation score (nb of correct classifications)")
+        plt.plot(range(min_features_select,
+                       len(selector.grid_scores_) + min_features_select),
+                 selector.grid_scores_)
+        fig.savefig(make_file + '\\features_score' + str(ex_num) + '.png')
+        X = X_new
+
+    X_value = X.values
 
     # 層化k分割交差検証
     start = time.time()
     skf = StratifiedKFold(n_splits=FOLD)
-    for train_id, test_id in skf.split(X, y):
-        train_x, test_x = X[train_id], X[test_id]
+    for train_id, test_id in skf.split(X_value, y):
+        train_x, test_x = X_value[train_id], X_value[test_id]
         train_y, test_y = y[train_id], y[test_id]
 
         clf.fit(train_x, train_y)
@@ -238,8 +239,7 @@ if __name__ == '__main__':
     print(df)
 
     # ランダムフォレストの説明変数の重要度をデータフレーム化
-    # fea_rf_imp = pd.DataFrame({'imp': np.mean(np.array(importance_ave), axis=0), 'col': X_new.columns})
-    fea_rf_imp = pd.DataFrame({'imp': np.mean(np.array(importance_ave), axis=0), 'col': X_label.columns})
+    fea_rf_imp = pd.DataFrame({'imp': np.mean(np.array(importance_ave), axis=0), 'col': X.columns})
     fea_rf_imp = fea_rf_imp.sort_values(by='imp', ascending=False)
 
     # ランダムフォレストの重要度を可視化
