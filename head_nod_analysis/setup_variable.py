@@ -21,8 +21,10 @@ axis_columns = ['acc_X', 'acc_Y', 'acc_Z',
                 'gyro_X', 'gyro_Y', 'gyro_Z',
                 'acc_xyz']
 
+gyro_columns = ['gyro_X', 'gyro_Y', 'gyro_Z']
+
 # ウィンドウ単位の処理用定数
 T = 100  # サンプリング周期 [Hz]
-N = 32  # ウィンドウサイズ(0.64秒)
+N = 32  # ウィンドウサイズ(0.32秒)
 OVERLAP = 50  # オーバーラップ率 [%]
 FOLD = 10

@@ -14,12 +14,12 @@ def wait():
 
 
 class PopUp:
-    def Action(self, action_name):
+    def Action(self, action_name, action_num):
         if 'うなずき' in action_name:   push_button = 1
         else:   push_button = 2
         notification.notify(
             title=action_name,
-            message=str(push_button),
+            message=str(push_button) + '                                          ---  ' + str(action_num),
             app_icon="python.ico",
             timeout=5
         )
@@ -43,7 +43,7 @@ if __name__ == '__main__':
         for i in range(4):
             action_num += 1
             winsound.Beep(800, 100)
-            popup.Action(rand_action[i])
+            popup.Action(rand_action[i], action_num)
             wait()
 
     winsound.Beep(400, 100)

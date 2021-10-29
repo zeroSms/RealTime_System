@@ -28,6 +28,8 @@ feature_columns.extend([('per75_' + name) for name in setup_variable.axis_column
 feature_columns.extend([('per_range_' + name) for name in setup_variable.axis_columns])
 # 二乗平均平方根
 feature_columns.extend([('RMS_' + name) for name in setup_variable.axis_columns])
+# 相関係数
+feature_columns.extend([('coef_' + name) for name in ['acc_xy', 'acc_xz', 'acc_yz', 'gyro_xy', 'gyro_xz', 'gyro_yz']])
 
 # Power Band
 for axis in setup_variable.axis_columns:
@@ -127,6 +129,16 @@ def get_feature(window):
     # 二乗平均平方根
     square = np.square(df.values)
     feature_list_mini.extend(np.sqrt(np.mean(square, axis=0)))
+
+    # 相関係数(加速度)
+    coef = df.iloc[:, 0:3].corr().values
+    feature_list_mini.extend([coef[0, 1], coef[0, 2], coef[1, 2]])
+    # 相関係数(角速度)
+    coef = df.iloc[:, 3:6].corr().values
+    feature_list_mini.extend([coef[0, 1], coef[0, 2], coef[1, 2]])
+    # CrossCorrelation
+
+
 
     # 周波数領域
     axis_fft = {}

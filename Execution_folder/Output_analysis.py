@@ -5,6 +5,7 @@ import csv
 import glob
 import os
 import shutil
+import time
 from _csv import reader
 import numpy as np
 from collections import Counter
@@ -90,7 +91,8 @@ def do_process_window():
     shutil.rmtree(rm_file)
     os.makedirs(rm_file)
     # logファイルのコピー
-    glob_file = path + '\\data_set\\log_files\\value_list*.csv'  # 全ファイル
+    # glob_file = path + '\\data_set\\log_files\\100Hz\\value_list*.csv'  # 全ファイル
+    glob_file = path + '\\data_set\\log_files\\test\\value_list*.csv'  # 全ファイル
     log_list = glob.glob(glob_file)
     for file_name in log_list:
         with open(file_name, 'r') as f:
@@ -112,11 +114,12 @@ def do_process_window():
         while len(data_queue) > N:
             window = process_window(data_queue)
             if window:
+                # feature_list.append(get_feature.get_feature(window))
                 feature_list.append(get_feature.get_feature(window))
                 analysis_csv.extend(label_shape(window))
 
 
-# ================================= メイン関数　実行 ================================ #
+# =========================================== メイン関数　実行 ============================================== #
 FOLD = setup_variable.FOLD  # 交差検証分割数
 importance_ave = []
 sum_test = []
@@ -126,6 +129,14 @@ PCA_bar = []
 
 if __name__ == '__main__':
     ex_num = input('実験番号：')
+
+    # Resultの初期化
+    make_file = path + '\\Result\\feature' + str(ex_num)
+    if os.path.exists(make_file):
+        shutil.rmtree(make_file)
+    os.makedirs(make_file)
+
+    # ウィンドウ処理
     do_process_window()
 
     # TimeStampラベルを削除
@@ -147,33 +158,38 @@ if __name__ == '__main__':
         writer.writerows(feature_list)
 
     # 正解データ取得
+    # X = pd.DataFrame(feature_list, columns=get_feature.feature_columns)
     X = pd.DataFrame(feature_list, columns=get_feature.feature_columns)
     y = pd.Series(data=np.array(answer_list))
 
     clf = RandomForestClassifier(max_depth=30, n_estimators=30, random_state=42)
 
-    # 特徴量削減
-    min_features_select = 10
-    selector = RFECV(clf, min_features_to_select=min_features_select, cv=10)
-    # selector = RFE(clf, n_features_to_select=min_features_select)
-    X_new = pd.DataFrame(selector.fit_transform(X, y),
-                         columns=X.columns.values[selector.get_support()])
-    result = pd.DataFrame(selector.get_support(), index=X.columns.values, columns=['False: dropped'])
-    result['ranking'] = selector.ranking_
-    result.to_csv('result1.csv')
-
-    # Plot number of features VS. cross-validation scores
-    plt.figure()
-    plt.xlabel("Number of features selected")
-    plt.ylabel("Cross validation score (nb of correct classifications)")
-    plt.plot(range(min_features_select,
-                   len(selector.grid_scores_) + min_features_select),
-             selector.grid_scores_)
-    plt.show()
+    # # 特徴量削減
+    # min_features_select = 10
+    # selector = RFECV(clf, min_features_to_select=min_features_select, cv=10)
+    # # selector = RFE(clf, n_features_to_select=min_features_select)
+    # X_new = pd.DataFrame(selector.fit_transform(X, y),
+    #                      columns=X.columns.values[selector.get_support()])
+    # print(len(X.columns.values[selector.get_support()]))
+    # result = pd.DataFrame(selector.get_support(), index=X.columns.values, columns=['False: dropped'])
+    # result['ranking'] = selector.ranking_
+    # result.to_csv(make_file + '\\feature_rank' + str(ex_num) + '.csv')
+    #
+    # # Plot number of features VS. cross-validation scores
+    # fig = plt.figure()
+    # plt.xlabel("Number of features selected")
+    # plt.ylabel("Cross validation score (nb of correct classifications)")
+    # plt.plot(range(min_features_select,
+    #                len(selector.grid_scores_) + min_features_select),
+    #          selector.grid_scores_)
+    # fig.savefig(make_file + '\\features_score' + str(ex_num) + '.png')
+    # X = X_new.values
+    X_label = X
+    X = X.values
 
     # 層化k分割交差検証
+    start = time.time()
     skf = StratifiedKFold(n_splits=FOLD)
-    X = X_new.values
     for train_id, test_id in skf.split(X, y):
         train_x, test_x = X[train_id], X[test_id]
         train_y, test_y = y[train_id], y[test_id]
@@ -183,7 +199,7 @@ if __name__ == '__main__':
         # テストセットの精度検証
         pred_test = clf.predict(test_x)
         test_score = classification_report(test_y, pred_test, target_names=['others', 'nod', 'shake'], output_dict=True)
-        print(classification_report(test_y, pred_test, target_names=['others', 'nod', 'shake']))
+        # print(classification_report(test_y, pred_test, target_names=['others', 'nod', 'shake']))
         for k1 in test_score.keys():
             if not (k1 in score_dict):
                 if k1 == 'accuracy':
@@ -202,7 +218,12 @@ if __name__ == '__main__':
         sum_test.extend(test_y)
         sum_pred.extend(pred_test)
 
-    view_Confusion_matrix.print_cmx(sum_test, sum_pred)
+    end = time.time()
+
+    # 混同行列
+    view_Confusion_matrix.print_cmx(sum_test, sum_pred, make_file, ex_num)
+
+    # 交差検証結果（平均）
     for k1 in score_dict.keys():
         if k1 == 'accuracy':
             score_dict[k1] /= FOLD
@@ -213,17 +234,22 @@ if __name__ == '__main__':
     df = pd.DataFrame(score_dict).T
     df = df.round(2)
     df = df.astype({'support': 'int'})
+    df.to_csv(make_file + '\\result_score' + str(ex_num) + '.csv')
     print(df)
 
     # ランダムフォレストの説明変数の重要度をデータフレーム化
-    fea_rf_imp = pd.DataFrame({'imp': np.mean(np.array(importance_ave), axis=0), 'col': X_new.columns})
+    # fea_rf_imp = pd.DataFrame({'imp': np.mean(np.array(importance_ave), axis=0), 'col': X_new.columns})
+    fea_rf_imp = pd.DataFrame({'imp': np.mean(np.array(importance_ave), axis=0), 'col': X_label.columns})
     fea_rf_imp = fea_rf_imp.sort_values(by='imp', ascending=False)
 
     # ランダムフォレストの重要度を可視化
-    plt.figure(figsize=(10, 7))
+    fig = plt.figure(figsize=(10, 7))
     sns.barplot(x='imp', y='col', data=fea_rf_imp, orient='h')
     plt.title('Random Forest - Feature Importance', fontsize=28)
     plt.ylabel('Features', fontsize=18)
     plt.xlabel('Importance', fontsize=18)
+    fig.savefig(make_file + '\\features_importance' + str(ex_num) + '.png')
     plt.show()
+
+    print("elapsed_time:{0}".format(end-start) + "[sec]")
 
