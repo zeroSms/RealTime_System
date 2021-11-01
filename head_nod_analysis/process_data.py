@@ -19,7 +19,6 @@ from sklearn.metrics import accuracy_score, classification_report
 from . import add_data, get_feature, setup_variable, stop
 from paz.backend import camera as CML
 
-
 analysis_csv = [setup_variable.analysis_columns]  # windowデータの追加
 answer_list = []  # 正解データリスト（windowごと）
 feature_list = []  # 特徴量抽出データ
@@ -38,15 +37,15 @@ def label_shape(window):
     label_num = collections.Counter(window_T[0])  # labelごとの個数を計算
 
     # 正解データファイルの出力
-    if label_num['nod'] > len(window) / 2:
-        answer_list.append(1)
-    elif label_num['shake'] > len(window) / 2:
-        answer_list.append(2)
+    if label_num['nod'] > int(len(window) * 0.3):
+        answer_num = 1
+    elif label_num['shake'] > int(len(window) * 0.3):
+        answer_num = 2
     else:
-        answer_list.append(0)
+        answer_num = 0
     window_T[0] = [window_num] * len(window)  # window_IDの追加
 
-    return window_T.T, answer_list[-1]
+    return window_T.T, answer_num
 
 
 # ============================ データ処理スレッド ============================== #
@@ -62,25 +61,15 @@ def ProcessData():
 
 # 測定したデータを処理する関数
 push_server = []
-check_num = 0
-
-
 def Realtime_analysis(to_server=False, get_face=False):
-    global window_num, feature_list, push_server, check_num
-    filename = path + '\\data_set\\analysis_files\\feature_files\\feature_list1.csv'
-    train_x = pd.read_csv(filename, header=None)
-    filename = path + '\\data_set\\analysis_files\\answer_files\\answer_list1.csv'
-    y = np.loadtxt(filename, delimiter=",", dtype='int')
-    train_y = pd.Series(data=y)
+    global window_num, feature_list, push_server
 
-    # 主成分分析 (PCA)
-    pca = PCA(0.99)
-    pca.fit(train_x)
-    train_x = pca.transform(train_x)
-
-    # ランダムフォレスト
-    clf = RandomForestClassifier(max_depth=30, n_estimators=30, random_state=42)
-    clf.fit(train_x, train_y)
+    # 特徴量リスト
+    clf = pickle.load(open(path + '\\data_set\\analysis_files\\102\\trained_model.pkl', 'rb'))
+    sensor_name = 'gyro'
+    get_feature.feature_name(sensor_name)
+    filename = path + '\\data_set\\analysis_files\\102\\feature_list_selection.csv'
+    selection_X = pd.read_csv(filename)
 
     if to_server:
         host = server_address  # サーバーのホスト名
@@ -97,13 +86,15 @@ def Realtime_analysis(to_server=False, get_face=False):
 
             # ウィンドウラベルの付与，正解ラベルデータの作成
             result_window, answer_num = label_shape(window)
+            answer_list.append(answer_num)
             analysis_csv.extend(result_window)
 
-            # リアルタイム行動分析
-            feature_list.append(get_feature.get_feature(window))
-            test_x = pd.DataFrame(feature_list)
-
-            test_x = pca.transform(test_x)
+            # リアルタイム行動分析-特徴量抽出
+            feature_list.append(get_feature.get_feature(window, sensor_name))
+            test_x = pd.DataFrame(feature_list, columns=get_feature.feature_columns)
+            selection_X_columns = selection_X.columns[1:].tolist()  # 特徴量選択後のカラムを取得
+            test_x = test_x.loc[:, selection_X_columns]
+            test_x = test_x.values
 
             y_pred = clf.predict(test_x)
             print(y_pred, answer_num)  # 判定された行動の出力
@@ -121,8 +112,7 @@ def Realtime_analysis(to_server=False, get_face=False):
                 push_server = [y_pred[0], pred_face]
                 massage = pickle.dumps(push_server)
                 client.send(massage)  # 適当なデータを送信します（届く側にわかるように）
-            check_num += 1
-    print(check_num)
+
     print(realtime_pred)
     print(answer_list)
     test_y = pd.Series(data=answer_list)

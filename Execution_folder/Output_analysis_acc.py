@@ -4,21 +4,20 @@
 import csv
 import glob
 import os
+import pickle
 import shutil
+import time
 from _csv import reader
 import numpy as np
-from collections import Counter
 import pandas as pd
 
 # 自作ライブラリ
-from head_nod_analysis import setup_variable, get_feature_acc
+from head_nod_analysis import setup_variable, get_feature, feature_selection, process_data
 
 # 分類モデル
-from sklearn.feature_selection import RFE, RFECV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn.metrics import classification_report
-from sklearn.decomposition import PCA
 
 # 図の描画
 import matplotlib.pyplot as plt
@@ -35,27 +34,41 @@ feature_list = []  # 特徴量抽出データ
 path = setup_variable.path
 
 
-# ============================ データ整形スレッド ============================== #
-def label_shape(window):
-    window_T = np.array(window).T  # 転置　（labelごとの個数を計算するため）
-    label_num = Counter(window_T[0])  # labelごとの個数を計算
+# ================================= 分析ファイルの出力 ================================ #
+def output_files(X):
+    # Resultの初期化
+    analysis_data_file = path + '\\data_set\\analysis_files\\' + str(ex_num)
+    if os.path.exists(analysis_data_file):
+        shutil.rmtree(analysis_data_file)
+    os.makedirs(analysis_data_file)
 
-    # 正解データファイルの出力
-    if label_num['nod'] > int(len(window) * 0.3):
-        answer_list.append(1)
-    elif label_num['shake'] > int(len(window) * 0.3):
-        answer_list.append(2)
-    else:
-        answer_list.append(0)
-    window_T[0] = [window_num] * len(window)  # window_IDの追加
+    # ウィンドウ処理したデータの出力
+    to_csv_name = analysis_data_file + '\\window_list.csv'
+    df_analysis.to_csv(to_csv_name)
 
-    return window_T.T
+    # 正解データの出力
+    with open(analysis_data_file + '\\answer_list.csv', 'w') as f:
+        writer = csv.writer(f, lineterminator='\n')
+        writer.writerow(answer_list)
+
+    # 特徴量データの出力(選択なし)
+    with open(analysis_data_file + '\\feature_list.csv', 'w') as f:
+        writer = csv.writer(f, lineterminator='\n')
+        writer.writerows(feature_list)
+
+    # 特徴量データの出力(選択あり)
+    to_csv_name = analysis_data_file + '\\feature_list_selection.csv'
+    X.to_csv(to_csv_name)
+
+    # 学習モデルの保存
+    pickle.dump(clf, open(analysis_data_file + '\\trained_model.pkl', 'wb'))
 
 
 # ============================ ウィンドウ処理スレッド ============================== #
 # ウィンドウ単位の処理用定数
+sensor_name = 'acc'
 T = setup_variable.T  # サンプリング周期 [Hz]
-N = setup_variable.N  # ウィンドウサイズ(1.28秒)
+N = setup_variable.N  # ウィンドウサイズ
 OVERLAP = setup_variable.OVERLAP  # オーバーラップ率 [%]
 window_data = []
 get_window = []
@@ -112,9 +125,12 @@ def do_process_window():
         while len(data_queue) > N:
             window = process_window(data_queue)
             if window:
-                # feature_list.append(get_feature.get_feature(window))
-                feature_list.append(get_feature_acc.get_feature(window))
-                analysis_csv.extend(label_shape(window))
+                # 特徴量抽出
+                feature_list.append(get_feature.get_feature(window, sensor_name))
+                # ウィンドウラベルの付与，正解ラベルデータの作成
+                result_window, answer_num = process_data.label_shape(window)
+                answer_list.append(answer_num)
+                analysis_csv.extend(result_window)
 
 
 # ================================= メイン関数　実行 ================================ #
@@ -127,14 +143,16 @@ PCA_bar = []
 
 if __name__ == '__main__':
     ex_num = input('実験番号：')
-    feature_check = input('特徴量選択[y/n]：')
+    feature_check = input('特徴量選択[1/2/n]：')
 
     # Resultの初期化
-    make_file = path + '\\Result\\feature_acc' + str(ex_num)
+    make_file = path + '\\Result\\feature_gyro' + str(ex_num)
     if os.path.exists(make_file):
         shutil.rmtree(make_file)
     os.makedirs(make_file)
 
+    # 特徴量リスト
+    get_feature.feature_name(sensor_name)
     # ウィンドウ処理
     do_process_window()
 
@@ -142,51 +160,28 @@ if __name__ == '__main__':
     df_analysis = pd.DataFrame(analysis_csv[1:], columns=analysis_csv[0])
     df_analysis = df_analysis.drop('timeStamp', axis=1)
 
-    # ウィンドウ処理したデータの出力
-    to_csv_name = path + '\\data_set\\analysis_files\\window_files\\window_list' + ex_num + '.csv'
-    df_analysis.to_csv(to_csv_name)
-
-    # 正解データの出力
-    with open(path + '\\data_set\\analysis_files\\answer_files\\answer_list' + ex_num + '.csv', 'w') as f:
-        writer = csv.writer(f, lineterminator='\n')
-        writer.writerow(answer_list)
-
-    # 特徴量データの出力
-    with open(path + '\\data_set\\analysis_files\\feature_files\\feature_list' + ex_num + '.csv', 'w') as f:
-        writer = csv.writer(f, lineterminator='\n')
-        writer.writerows(feature_list)
-
     # 正解データ取得
-    X = pd.DataFrame(feature_list, columns=get_feature_acc.feature_columns)
+    X = pd.DataFrame(feature_list, columns=get_feature.feature_columns)
     y = pd.Series(data=np.array(answer_list))
 
+    # 分類モデルの適用
     clf = RandomForestClassifier(max_depth=30, n_estimators=30, random_state=42)
 
-    if feature_check == 'y':
-        # 特徴量削減
-        min_features_select = 10
-        selector = RFECV(clf, min_features_to_select=min_features_select, cv=10)
-        # selector = RFE(clf, n_features_to_select=min_features_select)
-        X_new = pd.DataFrame(selector.fit_transform(X, y),
-                             columns=X.columns.values[selector.get_support()])
-        print(len(X.columns.values[selector.get_support()]))
-        result = pd.DataFrame(selector.get_support(), index=X.columns.values, columns=['False: dropped'])
-        result['ranking'] = selector.ranking_
-        result.to_csv(make_file + '\\feature_rank' + str(ex_num) + '.csv')
-
-        # Plot number of features VS. cross-validation scores
-        fig = plt.figure()
-        plt.xlabel("Number of features selected")
-        plt.ylabel("Cross validation score (nb of correct classifications)")
-        plt.plot(range(min_features_select,
-                       len(selector.grid_scores_) + min_features_select),
-                 selector.grid_scores_)
-        fig.savefig(make_file + '\\features_score' + str(ex_num) + '.png')
-        X = X_new
-
+    # 特徴量選択
+    if feature_check == '1':
+        method = feature_selection.Wrapper_Method(clf, X, y, make_file, ex_num)
+        X = method.RFE_CV()
+    elif feature_check == '2':
+        method = feature_selection.Embedded_Method(clf, X, y, make_file, ex_num)
+        X = method.SFM()
     X_value = X.values
 
+    # 分析ファイルの出力
+    clf.fit(X_value, y)
+    output_files(X)
+
     # 層化k分割交差検証
+    start = time.time()
     skf = StratifiedKFold(n_splits=FOLD)
     for train_id, test_id in skf.split(X_value, y):
         train_x, test_x = X_value[train_id], X_value[test_id]
@@ -197,7 +192,7 @@ if __name__ == '__main__':
         # テストセットの精度検証
         pred_test = clf.predict(test_x)
         test_score = classification_report(test_y, pred_test, target_names=['others', 'nod', 'shake'], output_dict=True)
-        print(classification_report(test_y, pred_test, target_names=['others', 'nod', 'shake']))
+        # print(classification_report(test_y, pred_test, target_names=['others', 'nod', 'shake']))
         for k1 in test_score.keys():
             if not (k1 in score_dict):
                 if k1 == 'accuracy':
@@ -216,6 +211,8 @@ if __name__ == '__main__':
         sum_test.extend(test_y)
         sum_pred.extend(pred_test)
 
+    elapsed_time = time.time() - start
+
     # 混同行列
     view_Confusion_matrix.print_cmx(sum_test, sum_pred, make_file, ex_num)
 
@@ -230,6 +227,7 @@ if __name__ == '__main__':
     df = pd.DataFrame(score_dict).T
     df = df.round(2)
     df = df.astype({'support': 'int'})
+    df['elapsed_time'] = elapsed_time
     df.to_csv(make_file + '\\result_score' + str(ex_num) + '.csv')
     print(df)
 
@@ -245,4 +243,3 @@ if __name__ == '__main__':
     plt.xlabel('Importance', fontsize=18)
     fig.savefig(make_file + '\\features_importance' + str(ex_num) + '.png')
     plt.show()
-

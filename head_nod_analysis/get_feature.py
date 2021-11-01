@@ -9,38 +9,57 @@ from scipy.fft import rfft, fft
 
 from . import setup_variable
 
+
+def Sensor_name(sensor_name):
+    if sensor_name == 'acc':
+        return setup_variable.acc_columns
+    elif sensor_name == 'gyro':
+        return setup_variable.gyro_columns
+    else:
+        return setup_variable.axis_columns
+
+
 feature_columns = []
-# 平均
-feature_columns.extend([('mean_' + name) for name in setup_variable.axis_columns])
-# 最大
-feature_columns.extend([('max_' + name) for name in setup_variable.axis_columns])
-# 最小
-feature_columns.extend([('min_' + name) for name in setup_variable.axis_columns])
-# 分散
-feature_columns.extend([('var_' + name) for name in setup_variable.axis_columns])
-# 中央値
-feature_columns.extend([('median_' + name) for name in setup_variable.axis_columns])
-# 第一四分位
-feature_columns.extend([('per25_' + name) for name in setup_variable.axis_columns])
-# 第三四分位
-feature_columns.extend([('per75_' + name) for name in setup_variable.axis_columns])
-# 四分位範囲
-feature_columns.extend([('per_range_' + name) for name in setup_variable.axis_columns])
-# 二乗平均平方根
-feature_columns.extend([('RMS_' + name) for name in setup_variable.axis_columns])
-# 相関係数
-feature_columns.extend([('coef_' + name) for name in ['acc_xy', 'acc_xz', 'acc_yz', 'gyro_xy', 'gyro_xz', 'gyro_yz']])
+def feature_name(sensor_name):
+    axis_columns = Sensor_name(sensor_name)
+    # 平均
+    feature_columns.extend([('mean_' + name) for name in axis_columns])
+    # 最大
+    feature_columns.extend([('max_' + name) for name in axis_columns])
+    # 最小
+    feature_columns.extend([('min_' + name) for name in axis_columns])
+    # 分散
+    feature_columns.extend([('var_' + name) for name in axis_columns])
+    # 中央値
+    feature_columns.extend([('median_' + name) for name in axis_columns])
+    # 第一四分位
+    feature_columns.extend([('per25_' + name) for name in axis_columns])
+    # 第三四分位
+    feature_columns.extend([('per75_' + name) for name in axis_columns])
+    # 四分位範囲
+    feature_columns.extend([('per_range_' + name) for name in axis_columns])
+    # 二乗平均平方根
+    feature_columns.extend([('RMS_' + name) for name in axis_columns])
 
-# Power Band
-for axis in setup_variable.axis_columns:
-    feature_columns.extend([(name + axis) for name in ['PB0-5', 'PB5-10', 'PB10-15', 'PB15-20', 'PB20-25', 'PB25-30',
-                                                       'PB30-35', 'PB35-40', 'PB40-45', 'PB45-50']])
+    # 相関係数
+    if sensor_name == 'acc':
+        coef_axis = ['acc_xy', 'acc_xz', 'acc_yz']
+    elif sensor_name == 'gyro':
+        coef_axis = ['gyro_xy', 'gyro_xz', 'gyro_yz']
+    else:
+        coef_axis = ['acc_xy', 'acc_xz', 'acc_yz', 'gyro_xy', 'gyro_xz', 'gyro_yz']
+    feature_columns.extend(
+        [('coef_' + name) for name in coef_axis])
 
-# Freq_Ent(周波数領域エントロピー)
-feature_columns.extend([('FE_' + name) for name in setup_variable.axis_columns])
-
-# Energy
-feature_columns.extend([('En_' + name) for name in setup_variable.axis_columns])
+    # Power Band
+    for axis in axis_columns:
+        feature_columns.extend(
+            [(name + axis) for name in ['PB0-5', 'PB5-10', 'PB10-15', 'PB15-20', 'PB20-25', 'PB25-30',
+                                        'PB30-35', 'PB35-40', 'PB40-45', 'PB45-50']])
+    # Freq_Ent(周波数領域エントロピー)
+    feature_columns.extend([('FE_' + name) for name in axis_columns])
+    # Energy
+    feature_columns.extend([('En_' + name) for name in axis_columns])
 
 
 class Calc_FFT:
@@ -100,11 +119,17 @@ class Calc_FFT:
         return DC
 
 
-def get_feature(window):
+def get_feature(window, sensor_name):
+    axis_columns = Sensor_name(sensor_name)
     feature_list_mini = []
     df = pd.DataFrame(window, columns=setup_variable.analysis_columns)
     df = df.drop(['window_ID', 'timeStamp'], axis=1)
     df = df.astype('float')
+
+    if sensor_name == 'acc':
+        df = df.drop(setup_variable.gyro_columns, axis=1)
+    elif sensor_name == 'gyro':
+        df = df.drop(setup_variable.acc_columns, axis=1)
 
     # 平均
     feature_list_mini.extend(np.mean(df.values, axis=0))
@@ -128,24 +153,27 @@ def get_feature(window):
     square = np.square(df.values)
     feature_list_mini.extend(np.sqrt(np.mean(square, axis=0)))
 
-    # 相関係数(加速度)
-    coef = df.iloc[:, 0:3].corr().values
-    feature_list_mini.extend([coef[0, 1], coef[0, 2], coef[1, 2]])
-    # 相関係数(角速度)
-    coef = df.iloc[:, 3:6].corr().values
-    feature_list_mini.extend([coef[0, 1], coef[0, 2], coef[1, 2]])
+    if sensor_name == 'acc' or 'gyro':
+        # 相関係数
+        coef = df.iloc[:, 0:3].corr().values
+        feature_list_mini.extend([coef[0, 1], coef[0, 2], coef[1, 2]])
+    else:
+        # 相関係数(加速度)
+        coef = df.iloc[:, 0:3].corr().values
+        feature_list_mini.extend([coef[0, 1], coef[0, 2], coef[1, 2]])
+        # 相関係数(角速度)
+        coef = df.iloc[:, 3:6].corr().values
+        feature_list_mini.extend([coef[0, 1], coef[0, 2], coef[1, 2]])
     # CrossCorrelation
-
-
 
     # 周波数領域
     axis_fft = {}
-    for axis in setup_variable.axis_columns:
+    for axis in axis_columns:
         axis_fft[axis] = Calc_FFT(df[axis])
 
     # Power Band
     FFT_PB = []
-    for axis in setup_variable.axis_columns:
+    for axis in axis_columns:
         # 5Hz刻みでパワーバンドを計算
         for i in range(0, 10):
             PB = axis_fft[axis].Calc_PowerBand(i * 5, (i + 1) * 5)
@@ -154,14 +182,14 @@ def get_feature(window):
 
     # Freq Ent(周波数領域エントロピー)
     FFT_FE = []
-    for axis in setup_variable.axis_columns:
+    for axis in axis_columns:
         FE = axis_fft[axis].Calc_FreqEnt()
         FFT_FE.append(FE)
     feature_list_mini.extend(FFT_FE)
 
     # Energy
     FFT_En = []
-    for axis in setup_variable.axis_columns:
+    for axis in axis_columns:
         En = axis_fft[axis].Calc_Energy()
         FFT_En.append(En)
     feature_list_mini.extend(FFT_En)
