@@ -234,6 +234,7 @@ if __name__ == '__main__':
     # ランダムフォレストの説明変数の重要度をデータフレーム化
     fea_rf_imp = pd.DataFrame({'imp': np.mean(np.array(importance_ave), axis=0), 'col': X.columns})
     fea_rf_imp = fea_rf_imp.sort_values(by='imp', ascending=False)
+    fea_rf_imp.to_csv(make_file + '\\features_importance' + str(ex_num) + '.csv')
 
     # ランダムフォレストの重要度を可視化
     fig = plt.figure(figsize=(10, 7))

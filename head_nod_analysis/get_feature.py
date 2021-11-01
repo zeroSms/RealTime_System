@@ -153,16 +153,16 @@ def get_feature(window, sensor_name):
     square = np.square(df.values)
     feature_list_mini.extend(np.sqrt(np.mean(square, axis=0)))
 
-    if sensor_name == 'acc' or 'gyro':
-        # 相関係数
-        coef = df.iloc[:, 0:3].corr().values
-        feature_list_mini.extend([coef[0, 1], coef[0, 2], coef[1, 2]])
-    else:
+    if sensor_name == 'all':
         # 相関係数(加速度)
         coef = df.iloc[:, 0:3].corr().values
         feature_list_mini.extend([coef[0, 1], coef[0, 2], coef[1, 2]])
         # 相関係数(角速度)
         coef = df.iloc[:, 3:6].corr().values
+        feature_list_mini.extend([coef[0, 1], coef[0, 2], coef[1, 2]])
+    else:
+        # 相関係数
+        coef = df.iloc[:, 0:3].corr().values
         feature_list_mini.extend([coef[0, 1], coef[0, 2], coef[1, 2]])
     # CrossCorrelation
 

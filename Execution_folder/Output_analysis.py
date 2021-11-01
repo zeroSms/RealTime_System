@@ -146,7 +146,7 @@ if __name__ == '__main__':
     feature_check = input('特徴量選択[1/2/n]：')
 
     # Resultの初期化
-    make_file = path + '\\Result\\feature_gyro' + str(ex_num)
+    make_file = path + '\\Result\\feature' + str(ex_num)
     if os.path.exists(make_file):
         shutil.rmtree(make_file)
     os.makedirs(make_file)
@@ -234,6 +234,7 @@ if __name__ == '__main__':
     # ランダムフォレストの説明変数の重要度をデータフレーム化
     fea_rf_imp = pd.DataFrame({'imp': np.mean(np.array(importance_ave), axis=0), 'col': X.columns})
     fea_rf_imp = fea_rf_imp.sort_values(by='imp', ascending=False)
+    fea_rf_imp.to_csv(make_file + '\\features_importance' + str(ex_num) + '.csv')
 
     # ランダムフォレストの重要度を可視化
     fig = plt.figure(figsize=(10, 7))
