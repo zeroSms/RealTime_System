@@ -35,11 +35,12 @@ server_address = '192.168.2.111'
 def label_shape(window):
     window_T = np.array(window).T  # 転置　（labelごとの個数を計算するため）
     label_num = collections.Counter(window_T[0])  # labelごとの個数を計算
+    threshold = setup_variable.threshold
 
     # 正解データファイルの出力
-    if label_num['nod'] > int(len(window) * 0.3):
+    if label_num['nod'] > int(len(window) * threshold):
         answer_num = 1
-    elif label_num['shake'] > int(len(window) * 0.3):
+    elif label_num['shake'] > int(len(window) * threshold):
         answer_num = 2
     else:
         answer_num = 0
@@ -73,6 +74,7 @@ def Realtime_analysis(to_server=False, get_face=False):
 
     if to_server:
         host = server_address  # サーバーのホスト名
+        # client_address =
         port = 50000  # 49152~65535
 
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # オブジェクトの作成をします

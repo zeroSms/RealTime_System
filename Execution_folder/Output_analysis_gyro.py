@@ -67,6 +67,7 @@ def output_files(X):
 # ============================ ウィンドウ処理スレッド ============================== #
 # ウィンドウ単位の処理用定数
 sensor_name = 'gyro'
+data_set = 'main'
 T = setup_variable.T  # サンプリング周期 [Hz]
 N = setup_variable.N  # ウィンドウサイズ
 OVERLAP = setup_variable.OVERLAP  # オーバーラップ率 [%]
@@ -103,7 +104,7 @@ def do_process_window():
     shutil.rmtree(rm_file)
     os.makedirs(rm_file)
     # logファイルのコピー
-    glob_file = path + '\\data_set\\log_files\\100Hz\\value_list*.csv'  # 全ファイル
+    glob_file = path + '\\data_set\\log_files\\' + data_set + '\\value_list*.csv'  # 全ファイル
     log_list = glob.glob(glob_file)
     for file_name in log_list:
         with open(file_name, 'r') as f:
@@ -165,7 +166,10 @@ if __name__ == '__main__':
     y = pd.Series(data=np.array(answer_list))
 
     # 分類モデルの適用
-    clf = RandomForestClassifier(max_depth=30, n_estimators=30, random_state=42)
+    max_depth = setup_variable.max_depth
+    n_estimators = setup_variable.n_estimators
+    random_state = setup_variable.random_state
+    clf = RandomForestClassifier(max_depth=max_depth, n_estimators=n_estimators, random_state=random_state)
 
     # 特徴量選択
     if feature_check == '1':
@@ -243,4 +247,18 @@ if __name__ == '__main__':
     plt.ylabel('Features', fontsize=18)
     plt.xlabel('Importance', fontsize=18)
     fig.savefig(make_file + '\\features_importance' + str(ex_num) + '.png')
-    plt.show()
+
+
+    # パラメータの出力
+    paramater = {'data_set': data_set,
+                 'サンプリング周波数': setup_variable.T,
+                 'オーバーラップ率': setup_variable.OVERLAP,
+                 'ウィンドウサイズ': setup_variable.N,
+                 'ウィンドウラベル閾値': setup_variable.threshold,
+                 'max_depth': setup_variable.max_depth,
+                 'n_estimator': setup_variable.n_estimators,
+                 'random_state': setup_variable.random_state}
+    with open(make_file + '\\paramater' + str(ex_num) + '.csv', 'w', newline='') as f:
+        writer = csv.writer(f)
+        for k, v in paramater.items():
+            writer.writerow([k, v])
