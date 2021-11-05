@@ -44,18 +44,20 @@ def main():
     loop = asyncio.new_event_loop()
     thread_1 = threading.Thread(target=add_data.AddData, args=(address, loop,))
     thread_2 = threading.Thread(target=process_data.Realtime_analysis, args=(False, False))
-    # thread_3 = threading.Thread(target=view_Realtime_head.view_action())
-    thread_4 = threading.Thread(target=Stop)
-    thread_5 = threading.Thread(target=Label)
+    thread_3 = threading.Thread(target=Stop)
+    thread_4 = threading.Thread(target=Label)
+    # # スレッドを立ててtkinterの画像表示を開始する
+    # thread_5 = threading.Thread(target=view_Realtime_head.show_image)
 
     thread_1.start()
     thread_2.start()
-    # thread_3.start()
+    thread_3.start()
     thread_4.start()
-    thread_5.start()
+    # thread_5.start()
+
     print('start!')
 
-    view_Realtime_head.view_action()
+    # view_Realtime_head.show_image()
 
     # スレッドの待ち合わせ処理
     thread_list = threading.enumerate()

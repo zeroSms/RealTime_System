@@ -1,11 +1,10 @@
-import sys
 import tkinter
 from PIL import Image, ImageTk
 import threading
 import time
 import random
 
-
+global item, canvas
 def show_image():
     # 外から触れるようにグローバル変数で定義
     global item, canvas

@@ -17,6 +17,7 @@ from sklearn.metrics import accuracy_score, classification_report
 
 # 自作ライブラリ
 from . import add_data, get_feature, setup_variable, stop
+from . import view_Realtime_head as VH
 from paz.backend import camera as CML
 
 analysis_csv = [setup_variable.analysis_columns]  # windowデータの追加
@@ -62,10 +63,10 @@ def ProcessData():
 
 # 測定したデータを処理する関数
 push_server = []
-
-
+show_head = 0
 def Realtime_analysis(to_server=False, get_face=False):
     global window_num, feature_list, push_server
+    global show_head
 
     # 特徴量リスト
     clf = pickle.load(open(path + '\\data_set\\analysis_files\\102\\trained_model.pkl', 'rb'))
@@ -108,14 +109,22 @@ def Realtime_analysis(to_server=False, get_face=False):
             print(y_pred, answer_num)       # 判定された行動の出力
             realtime_pred.extend(y_pred)    # 予測結果を追加
             feature_list = []               # 該当ウィンドウの特徴量リスト初期化
+            show_head = y_pred
+            # if show_head == 1:
+            #     VH.canvas.itemconfig(VH.item, image=VH.img1)
+            # elif show_head == 2:
+            #     VH.canvas.itemconfig(VH.item, image=VH.img2)
+            # else:
+            #     VH.canvas.itemconfig(VH.item, image=VH.img0)
+
 
             # 判定された表情の出力
             if get_face:
                 pred_face = CML.process_window()
                 print(pred_face)
-            else:
-                # 表情の判定がない場合，頭の動きを可視化(main_Realtime.py)
-                pyautogui.press(str(y_pred[0]))
+            # else:
+            #     # 表情の判定がない場合，頭の動きを可視化(main_Realtime.py)
+            #     pyautogui.press(str(y_pred[0]))
 
             # サーバーへの送信
             if to_server:
