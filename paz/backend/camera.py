@@ -80,18 +80,15 @@ class Camera(object):
         raise NotImplementedError
 
 
-face_list = [[], []]
-SCORE = 0
-NAME = 1
-
-
 # 表情のウィンドウ処理を行う
+face_list = [[], []]
+SCORE, NAME = 0, 1  # face_listの第1引数
 def process_window():
     global face_list
     while True:
         if len(face_list[SCORE]) == 0:
             face_list = [[], []]
-            return ["neutral"]
+            return ["null"]
         else:
             max_name = [face_list[NAME][i] for i, v in enumerate(face_list[SCORE]) if v == max(face_list[SCORE])]
             face_list = [[], []]
@@ -175,6 +172,7 @@ class VideoPlayer(object):
                 box2D = output['boxes2D'][0]
                 face_list[SCORE].append(box2D.score)
                 face_list[NAME].append(box2D.class_name)
+            print(face_list)
             image = resize_image(output['image'], tuple(self.image_size))
             show_image(image, 'inference', wait=False)
             writer.write(image)
