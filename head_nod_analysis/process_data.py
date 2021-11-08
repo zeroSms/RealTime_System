@@ -77,12 +77,13 @@ def Realtime_analysis(to_server=False, get_face=False):
     if to_server:
         host = server_address  # サーバーのホスト名
         client_address = socket.gethostname()  # クライアント側のホスト名
-        port = 50000  # 49152~65535
+        port = setup_variable.port  # 49152~65535
 
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # オブジェクトの作成をします
         client.connect((host, port))  # これでサーバーに接続します
 
         response = {'timeStamp': time.time(),
+                    'class': 'head',
                     'User': client_address
                     }
 
@@ -113,9 +114,9 @@ def Realtime_analysis(to_server=False, get_face=False):
             if get_face:
                 pred_face = CML.process_window()
                 print(pred_face)
-            else:
-                # 表情の判定がない場合，頭の動きを可視化(main_Realtime.py)
-                pyautogui.press(str(y_pred[0]))
+            # else:
+            #     # 表情の判定がない場合，頭の動きを可視化(main_Realtime.py)
+            #     pyautogui.press(str(y_pred[0]))
 
             # サーバーへの送信
             if to_server:
@@ -123,7 +124,7 @@ def Realtime_analysis(to_server=False, get_face=False):
                 if get_face:
                     response['face'] = pred_face
                 massage = pickle.dumps(response)
-                client.send(massage)  # 適当なデータを送信します（届く側にわかるように）
+                client.send(massage)  # データを送信
 
     print(realtime_pred)
     print(answer_list)

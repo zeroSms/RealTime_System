@@ -39,7 +39,7 @@ def getCsv_analysis(ex_num):
 # メイン関数
 def main():
     ex_num = input('実験番号：')
-    if input('サーバ通信：') == 'y':
+    if input('サーバ通信[y/n]：') == 'y':
         server = True
     else: server = False
 

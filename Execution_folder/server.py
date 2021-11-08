@@ -1,18 +1,25 @@
 import socket
 import pickle
 
+# 自作ライブラリ
+from head_nod_analysis import add_data, process_data, get_address, setup_variable, view_Realtime_head
+
 
 def server():
-    host = socket.gethostname()  # サーバーのホスト名
-    port = 50000  # 49152~65535
 
-    print(host)
-    print(socket.gethostbyname(host))
+    try:
+        host = socket.gethostname()  # サーバーのホスト名
+        port = setup_variable.port  # 49152~65535
 
-    serversock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    serversock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    serversock.bind((host, port))  # IPとPORTを指定してバインドします
-    serversock.listen(10)  # 接続の待ち受けをします（キューの最大数を指定）
+        print(host)
+        print(socket.gethostbyname(host))
+
+        serversock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        serversock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        serversock.bind((host, port))  # IPとPORTを指定してバインドします
+        serversock.listen(10)  # 接続の待ち受けをします（キューの最大数を指定）
+    except Exception as e:
+        print(e)
 
     print('Waiting for connections...')
     clientsock, client_address = serversock.accept()  # 接続されればデータを格納

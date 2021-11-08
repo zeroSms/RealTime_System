@@ -8,6 +8,7 @@ from head_nod_analysis import setup_variable
 # ================================= パスの取得 ================================ #
 path = setup_variable.path
 
+
 class Camera(object):
     """Camera abstract class.
     By default this camera uses the openCV functionality.
@@ -81,18 +82,24 @@ class Camera(object):
 
 
 # 表情のウィンドウ処理を行う
-face_list = [[], []]
+# process_windowが呼び出されるたび，face_listから表情を決定．
+# face_listを初期化
+face_list = {}
 SCORE, NAME = 0, 1  # face_listの第1引数
 def process_window():
     global face_list
+    max_key = {}
     while True:
-        if len(face_list[SCORE]) == 0:
-            face_list = [[], []]
-            return ["null"]
+        if not face_list:
+            face_list = {}
+            return 'null'
         else:
-            max_name = [face_list[NAME][i] for i, v in enumerate(face_list[SCORE]) if v == max(face_list[SCORE])]
-            face_list = [[], []]
-            return max_name
+            # 各キーの最大値を取得
+            for k in face_list.keys():
+                max_key[k] = max(face_list[k])
+
+            face_list = {}
+            return max(max_key, key=max_key.get)
 
 
 class VideoPlayer(object):
@@ -150,7 +157,7 @@ class VideoPlayer(object):
         self.camera.stop()
         cv2.destroyAllWindows()
 
-    def record(self, name=path+'/video/video.avi', fps=20, fourCC='DIVX'):
+    def record(self, name=path + '/video/video.avi', fps=20, fourCC='DIVX'):
         """Opens camera and records continuous inference using ``pipeline``.
 
         # Arguments
@@ -167,12 +174,17 @@ class VideoPlayer(object):
             output = self.step()
             if output is None:
                 continue
-            # 表情スコアの出力
+
+            # 表情スコアの出力(辞書型)
             if len(output['boxes2D']) != 0:
                 box2D = output['boxes2D'][0]
-                face_list[SCORE].append(box2D.score)
-                face_list[NAME].append(box2D.class_name)
-            print(face_list)
+                # print(output)
+                face_name = box2D.class_name
+                if face_name not in face_list:
+                    face_list[face_name] = []
+                face_list[face_name].append(box2D.score)
+            # print(face_list)
+
             image = resize_image(output['image'], tuple(self.image_size))
             show_image(image, 'inference', wait=False)
             writer.write(image)
