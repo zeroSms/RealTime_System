@@ -84,7 +84,7 @@ def Realtime_analysis(to_server=False, get_face=False):
 
         response = {'timeStamp': time.time(),
                     'class': 'head',
-                    'User': client_address
+                    'User': socket.gethostbyname(client_address)
                     }
 
     while stop.stop_flg:
@@ -120,7 +120,7 @@ def Realtime_analysis(to_server=False, get_face=False):
 
             # サーバーへの送信
             if to_server:
-                response['head_action'] = y_pred
+                response['head_action'] = y_pred[0]
                 if get_face:
                     response['face'] = pred_face
                 massage = pickle.dumps(response)

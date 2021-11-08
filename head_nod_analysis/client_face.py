@@ -35,30 +35,26 @@ def client_face(to_server=False):
                     'User': client_address
                     }
 
+    timeStamp = time.time()
     while stop.stop_flg:
-        time.sleep(3.2)
-        timeStamp = time.time()
+        if time.time() > timeStamp + 3.2:
+            timeStamp = time.time()
 
-        # 判定された表情の出力
-        pred_face = CML.process_window()
-        print(pred_face)
+            # 判定された表情の出力
+            pred_face = CML.process_window()
+            print(pred_face)
 
-        # サーバーへの送信
-        if to_server:
-            response['timeStamp'] = timeStamp
-            response['face'] = pred_face
-            massage = pickle.dumps(response)
-            client.send(massage)  # データを送信
+            # サーバーへの送信
+            if to_server:
+                response['timeStamp'] = timeStamp
+                response['face'] = pred_face
+                massage = pickle.dumps(response)
+                client.send(massage)  # データを送信
 
-
-
-
-
-
-
-
-
-
-
-
-
+                try:
+                    client.settimeout(1)
+                    recv_msg = client.recv(4096)  # レシーブは適当な2の累乗にします（大きすぎるとダメ）
+                    print(recv_msg.decode().replace('b', ''))
+                except Exception as e:
+                    print(e)
+                    continue
