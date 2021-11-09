@@ -36,15 +36,17 @@ if __name__ == "__main__":
 
     # 頭の動きのセンシング　スレッド開始
     loop = asyncio.new_event_loop()
+    thread = threading.Thread(target=face_detection)
     thread_1 = threading.Thread(target=client_face.client_face, args=(server,))
     thread_2 = threading.Thread(target=Stop)
 
+    thread.start()
     thread_1.start()
     thread_2.start()
     print('start!')
 
-    # 顔の表情のセンシング
-    face_detection()
+    # # 顔の表情のセンシング
+    # face_detection()
 
     # スレッドの待ち合わせ処理
     thread_list = threading.enumerate()

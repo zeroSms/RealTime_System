@@ -20,8 +20,6 @@ server_address = '192.168.2.111'
 
 # ================================= 表情の決定・通信 ================================ #
 def client_face(to_server=False):
-    global window_num, feature_list, push_server
-
     if to_server:
         host = server_address  # サーバーのホスト名
         client_address = socket.gethostname()  # クライアント側のホスト名
@@ -29,14 +27,15 @@ def client_face(to_server=False):
 
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # オブジェクトの作成をします
         client.connect((host, port))  # これでサーバーに接続します
+        client.send(pickle.dumps(['host']))
 
         response = {'timeStamp': time.time(),
-                    'class': 'face',
-                    'User': client_address
+                    'class': 'Face'
                     }
 
+    timeStamp = time.time()
     while stop.stop_flg:
-        time.sleep(3.2)
+        time.sleep(3)
         timeStamp = time.time()
 
         # 判定された表情の出力
@@ -45,20 +44,15 @@ def client_face(to_server=False):
 
         # サーバーへの送信
         if to_server:
-            response['timeStamp'] = timeStamp
-            response['face'] = pred_face
+            response['timeStamp'] = round(timeStamp, 2)
+            response['action'] = setup_variable.face_symbol(pred_face)
             massage = pickle.dumps(response)
             client.send(massage)  # データを送信
 
-
-
-
-
-
-
-
-
-
-
-
-
+            # try:
+            #     client.settimeout(2)
+            #     recv_msg = client.recv(4096)  # レシーブは適当な2の累乗にします（大きすぎるとダメ）
+            #     print(recv_msg.decode().replace('b', ''))
+            # except Exception as e:
+            #     print(e)
+            #     continue
