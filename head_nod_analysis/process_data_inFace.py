@@ -48,6 +48,19 @@ def label_shape(window):
 
     return window_T.T, answer_num
 
+# 表情の文字列を記号に変換
+def face_symbol(pred_face):
+    face_dict = {
+        'neutral'   : 'a',
+        'happy'     : 'b',
+        'surprise'  : 'c',
+        'sad'       : 'd',
+        'angry'     : 'e',
+        'fear'      : 'f',
+        'disgust'   : 'g'
+    }
+    return face_dict[pred_face]
+
 
 # ============================ データ処理スレッド ============================== #
 # 測定したデータを処理する関数
@@ -82,8 +95,9 @@ def Realtime_analysis(to_server=False, get_face=False):
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # オブジェクトの作成をします
         client.connect((host, port))  # これでサーバーに接続します
 
-        response = {'timeStamp': round(time.time(), 2),
+        response = {'timeStamp': time.time(),
                     'class': 'Head',
+                    'User': socket.gethostbyname(client_address)
                     }
 
     while stop.stop_flg:
@@ -109,12 +123,19 @@ def Realtime_analysis(to_server=False, get_face=False):
             realtime_pred.extend(y_pred)    # 予測結果を追加
             feature_list = []               # 該当ウィンドウの特徴量リスト初期化
 
-            # 頭の動きを可視化(main_Realtime.py)
-            pyautogui.press(str(y_pred[0]))
+            # 判定された表情の出力
+            if get_face:
+                pred_face = CML.process_window()
+                print(pred_face)
+            # else:
+            #     # 表情の判定がない場合，頭の動きを可視化(main_Realtime.py)
+            #     pyautogui.press(str(y_pred[0]))
 
             # サーバーへの送信
             if to_server:
-                response['action'] = y_pred[0]
+                response['head_action'] = y_pred[0]
+                if get_face:
+                    response['face_action'] = face_symbol(pred_face)
                 massage = pickle.dumps(response)
                 client.send(massage)  # データを送信
 

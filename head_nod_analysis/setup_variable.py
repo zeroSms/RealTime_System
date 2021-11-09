@@ -26,6 +26,21 @@ axis_columns = ['acc_X', 'acc_Y', 'acc_Z',
 acc_columns = ['acc_X', 'acc_Y', 'acc_Z', 'acc_xyz']
 gyro_columns = ['gyro_X', 'gyro_Y', 'gyro_Z']
 
+# 表情の文字列を記号に変換
+def face_symbol(pred_face):
+    face_dict = {
+        'neutral'   : 'a',
+        'happy'     : 'b',
+        'surprise'  : 'c',
+        'sad'       : 'd',
+        'angry'     : 'e',
+        'fear'      : 'f',
+        'disgust'   : 'g',
+        'null'      : 'z'
+    }
+    return face_dict[pred_face]
+
+
 # ============================ ウィンドウ単位の処理用定数 ============================== #
 T = 100  # サンプリング周期 [Hz]
 N = 32  # ウィンドウサイズ(0.32秒)

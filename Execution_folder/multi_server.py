@@ -6,27 +6,49 @@ import threading
 from head_nod_analysis import setup_variable, stop
 
 # グローバル変数
+presenter = 0
 clients = []  # クライアント側の接続状況を管理
+output_list, output_log = {}, {}    # 受信リスト
+
+# 受信した文字列をJSON形式に整形
+def shape_JSON(msg, address):
+    # msg={'timeStamp',
+    #      'class': 'Head' or 'Face'
+    #      'action': 頭の動きは0~2の数値，顔の表情はa~gまでの記号
+    #     }
+    if address not in output_list:
+        output_list[address] = {'Head': {}, 'Face': {}}
+        output_log[address] = {'Head': {}, 'Face': {}}
+    output_list[address][msg['class']][msg['timeStamp']] = msg['action']
+    output_log[address][msg['class']][msg['timeStamp']] = msg['action']
+    print(output_list)
 
 
 # 接続済みクライアントは読み込みおよび書き込みを繰り返す
 def loop_handler(connection, client_address):
-    while True:
+    global presenter
+    while stop.stop_flg:
         try:
             # クライアント側から受信する
             rcvmsg = connection.recv(4096)
-            # print(clients)
-            for value in clients:
-                # print(value[1][0], value[1][1])
-                if value[1][0] == client_address[0] and value[1][1] == client_address[1]:
-                    print('Received {} -> {}'.format(value[1][0], pickle.loads(rcvmsg)))
-                # else:
-                #     value[0].send(
-                #         "クライアント{}:{}から{}を受信".format(value[1][0], value[1][1], rcvmsg.decode()).encode("UTF-8"))
-                #     pass
-            # if client_address[0] == '192.168.2.162':
-            #     connection.sendto('aaaa'.encode('UTF-8'), client_address)  # メッセージを返します
-            # else:   continue
+
+            # 発表者デバイスのアドレスの特定
+            if pickle.loads(rcvmsg) == ['host']:
+                presenter = client_address[0]
+                print('Presenter address -> {}'.format(presenter))
+            else:
+                # 受信メッセージの出力
+                for value in clients:
+                    if value[1][0] == client_address[0] and value[1][1] == client_address[1]:
+                        print('Received {} -> {}'.format(value[1][0], pickle.loads(rcvmsg)))
+
+                        # # 受信した文字列をJSON形式に整形
+                        shape_JSON(pickle.loads(rcvmsg), client_address[0])
+
+                # 特定のアドレスに送信
+                if client_address[0] == presenter:
+                    connection.sendto('aaaa'.encode('UTF-8'), client_address)  # メッセージを返します
+
         except Exception as e:
             print('!!!')
             print(e)
@@ -72,6 +94,11 @@ def server():
 
 # ================================= メイン関数　実行 ================================ #
 if __name__ == '__main__':
+    # # Stopスレッド作成
+    # thread_stop = threading.Thread(target=stop.Stop(), daemon=True)
+    # thread_stop.start()
+
+    # サーバーの起動
     server()
 
     # スレッドの待ち合わせ処理
