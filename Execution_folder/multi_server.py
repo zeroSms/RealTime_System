@@ -14,7 +14,7 @@ from head_nod_analysis import setup_variable, stop
 
 # ============================ 正常終了スレッド ============================== #
 # プログラムを正常に終了するための関数
-def Stop():
+def Stop(server_num):
     # エンターが入力されるまで待ち続ける
     input()
     print("stop!\n")
@@ -118,10 +118,6 @@ def to_presenter(msg, presenter_address, connection):
         count_face = collections.Counter(face_list)
         return max(count_face, key=count_face.get)
 
-    # 発表者デバイスとの通信を切断
-    if output_copy['finish'] == True:
-        sys.exit()
-
     # 視聴者の人数を計算
     audience = len(output_copy)
     if audience > 0:
@@ -147,6 +143,11 @@ def loop_handler(connection, client_address):
 
             # 発表者デバイスとの送受信
             if rcvmsg['presenter'] == True:
+                # 切断処理
+                if rcvmsg['finish'] == True:
+                    print('発表者デバイスとの通信を終了')
+                    break
+
                 # 送信
                 to_presenter(rcvmsg, client_address, connection)
 
@@ -212,7 +213,7 @@ if __name__ == '__main__':
     thread_stop.start()
 
     # システムの終了関数/ログファイルの出力
-    Stop()
+    Stop(server_num)
 
     # スレッドの待ち合わせ処理
     thread_list = threading.enumerate()

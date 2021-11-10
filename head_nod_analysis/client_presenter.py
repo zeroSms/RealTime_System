@@ -21,14 +21,16 @@ def client_presenter():
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # オブジェクトの作成をします
     client.connect((host, port))  # これでサーバーに接続します
 
+    # サーバーへの送信
+    response = {'presenter': True,
+                'setting': False,
+                'finish': False
+                }
+
+    i = 0
     while True:
         time.sleep(3)
 
-        # サーバーへの送信
-        response = {'presenter': True,
-                    'setting': False,
-                    'finish': False
-                    }
         massage = pickle.dumps(response)
         client.send(massage)  # データを送信
 
@@ -39,6 +41,9 @@ def client_presenter():
         except Exception as e:
             print(e)
             continue
+        i += 1
+        if i == 5:
+            response['finish'] = True
 
 
 # ================================= メイン関数　実行 ================================ #
