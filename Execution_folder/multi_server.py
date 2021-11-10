@@ -1,53 +1,165 @@
+import collections
+import copy
 import socket
 import pickle
+import sys
 import threading
+import json
 
 # 自作ライブラリ
+import time
+
 from head_nod_analysis import setup_variable, stop
 
+
+# ============================ 正常終了スレッド ============================== #
+# プログラムを正常に終了するための関数
+def Stop():
+    # エンターが入力されるまで待ち続ける
+    input()
+    print("stop!\n")
+
+    # ログファイルの出力
+    with open('../server_files/server_log/' + server_num + '.json', 'w') as f:
+        json.dump(output_log, f, indent=4)
+    sys.exit()
+
+
+# ============================ マルチサーバー ============================== #
 # グローバル変数
 presenter = 0
 clients = []  # クライアント側の接続状況を管理
-output_list, output_log = {}, {}    # 受信リスト
-
+output_list, output_log = {}, {}  # 受信リスト
 # 受信した文字列をJSON形式に整形
 def shape_JSON(msg, address):
-    # msg={'timeStamp',
-    #      'class': 'Head' or 'Face'
-    #      'action': 頭の動きは0~2の数値，顔の表情はa~gまでの記号
-    #     }
+    """
+    msg = {'timeStamp',
+           'class': 'Head' or 'Face'
+           'action': 頭の動きは0~2の数値，顔の表情はa~gまでの記号
+           }
+
+    output = {'address': {'Head': {timeStamp: action},
+                          'Face': {timeStamp: action}
+                          }
+                          ...
+              }
+    """
     if address not in output_list:
         output_list[address] = {'Head': {}, 'Face': {}}
         output_log[address] = {'Head': {}, 'Face': {}}
     output_list[address][msg['class']][msg['timeStamp']] = msg['action']
     output_log[address][msg['class']][msg['timeStamp']] = msg['action']
-    print(output_list)
+    # print(output_list)
+
+def to_presenter(msg, address, connection):
+    """
+    msg = {'presenter': True,
+           'setting': True or False,
+           'finish': True or False
+           }
+
+    to_list = {'Sum': N,
+               'ID': {'address': {'head': 'action', 'face': 'action'},
+                      'address': {'head': 'action', 'face': 'action'},
+                      }
+               }
+    """
+    to_list = {}            # 送信用リスト
+    next_check_list = {}    # 次回繰り越し用リスト（要素数3未満の場合）
+    # output_listの複製・初期化
+    global output_list
+    output_copy = copy.deepcopy(output_list)
+    output_list = {}
+
+    # 頭の動きの検出結果の平滑化
+    def smoothie(queue_list):
+        if queue_list.count(1) >= 2:
+            return 1
+        elif queue_list.count(2) >= 2:
+            return 2
+        else:
+            return 0
+
+    # 各ユーザの頭の動きの決定
+    def to_head(address):
+        check_list = []  # 平滑化後のリスト
+        head_list = output_copy[address]['Head'].values()
+        # 前回繰り越しリストがあれば連結
+        if address in next_check_list:
+            head_list = next_check_list[address] + head_list
+            del next_check_list[address]
+
+        # 要素数3以上なら平滑化/先頭要素削除
+        while len(head_list) >= 3:
+            check_num = smoothie(head_list[0:3])
+            check_list.append(check_num)
+            head_list.pop(0)
+
+        # 要素数3未満なら次回に繰り越し
+        if len(head_list) < 3:
+            next_check_list[address] = copy.copy(head_list)
+
+        # 返す値の決定
+        count_1 = check_list.count(1)
+        count_2 = check_list.count(2)
+        if count_1 == count_2 and count_1 > 0:
+            return 3
+        elif count_1 > count_2:
+            return 1
+        elif count_2 > count_1:
+            return 2
+        else:
+            return 0
+
+    # 各ユーザの表情の決定
+    def to_face(address):
+        face_list = output_copy[address]['Face'].values()
+        count_face = collections.Counter(face_list)
+        return max(count_face, key=count_face.get)
+
+    # # 発表者デバイスとの通信を切断
+    # if output_copy['finish'] == True:
+    #     sys.exit()
+
+    # 視聴者の人数を計算
+    audience = len(output_copy)
+    if audience > 0:
+        to_list['Sum'] = audience
+        to_list['ID'] = {}
+        for address in output_copy.keys():
+            to_list['ID'][address] = {}
+            if output_copy[address]['Head']:
+                to_list['ID'][address]['head'] = to_head(address)
+            if output_copy[address]['Face']:
+                to_list['ID'][address]['face'] = to_face(address)
+
+    connection.sendto(pickle.dumps(to_list), address)  # メッセージを返します
 
 
 # 接続済みクライアントは読み込みおよび書き込みを繰り返す
 def loop_handler(connection, client_address):
     global presenter
-    while stop.stop_flg:
+    while True:
         try:
             # クライアント側から受信する
-            rcvmsg = connection.recv(4096)
+            rcvmsg = pickle.loads(connection.recv(4096))
 
-            # 発表者デバイスのアドレスの特定
-            if pickle.loads(rcvmsg) == ['host']:
+            # 発表者デバイスとの送受信
+            if rcvmsg['presenter'] == True:
                 presenter = client_address[0]
-                print('Presenter address -> {}'.format(presenter))
+
+                # 送信
+                to_presenter(rcvmsg, presenter, connection)
+
+            # 視聴者デバイスからの受信
             else:
                 # 受信メッセージの出力
                 for value in clients:
                     if value[1][0] == client_address[0] and value[1][1] == client_address[1]:
-                        print('Received {} -> {}'.format(value[1][0], pickle.loads(rcvmsg)))
+                        print('Received {} -> {}'.format(value[1][0], rcvmsg))
 
                         # # 受信した文字列をJSON形式に整形
-                        shape_JSON(pickle.loads(rcvmsg), client_address[0])
-
-                # 特定のアドレスに送信
-                if client_address[0] == presenter:
-                    connection.sendto('aaaa'.encode('UTF-8'), client_address)  # メッセージを返します
+                        shape_JSON(rcvmsg, client_address[0])
 
         except Exception as e:
             print('!!!')
@@ -68,7 +180,7 @@ def server():
     serversock.listen(10)  # 接続の待ち受けをします（キューの最大数を指定）
 
     print('Waiting for connections...')
-    while stop.stop_flg:
+    while True:
         try:
             # 接続要求を受信
             connection, client_address = serversock.accept()  # 接続されればデータを格納
@@ -94,12 +206,14 @@ def server():
 
 # ================================= メイン関数　実行 ================================ #
 if __name__ == '__main__':
-    # # Stopスレッド作成
-    # thread_stop = threading.Thread(target=stop.Stop(), daemon=True)
-    # thread_stop.start()
+    server_num = input('サーバー番号：')
 
     # サーバーの起動
-    server()
+    thread_stop = threading.Thread(target=server, daemon=True)
+    thread_stop.start()
+
+    # システムの終了関数/ログファイルの出力
+    Stop()
 
     # スレッドの待ち合わせ処理
     thread_list = threading.enumerate()

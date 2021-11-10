@@ -2,12 +2,8 @@
 # 表情の決定と通信処理
 #
 import time
-import numpy as np
-import collections
-import pandas as pd
 import socket
 import pickle
-import pyautogui
 
 # 自作ライブラリ
 from . import add_data, get_feature, setup_variable, stop
@@ -27,15 +23,15 @@ def client_face(to_server=False):
 
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # オブジェクトの作成をします
         client.connect((host, port))  # これでサーバーに接続します
-        client.send(pickle.dumps(['host']))
 
-        response = {'timeStamp': time.time(),
-                    'class': 'Face'
+        response = {'presenter': False,
+                    'timeStamp': time.time(),
+                    'class': 'Face',
                     }
 
     timeStamp = time.time()
     while stop.stop_flg:
-        time.sleep(3)
+        time.sleep(1)
         timeStamp = time.time()
 
         # 判定された表情の出力
