@@ -51,7 +51,7 @@ def shape_JSON(msg, address):
     output_log[address][msg['class']][msg['timeStamp']] = msg['action']
     # print(output_list)
 
-def to_presenter(msg, address, connection):
+def to_presenter(msg, presenter_address, connection):
     """
     msg = {'presenter': True,
            'setting': True or False,
@@ -66,6 +66,7 @@ def to_presenter(msg, address, connection):
     """
     to_list = {}            # 送信用リスト
     next_check_list = {}    # 次回繰り越し用リスト（要素数3未満の場合）
+
     # output_listの複製・初期化
     global output_list
     output_copy = copy.deepcopy(output_list)
@@ -117,9 +118,9 @@ def to_presenter(msg, address, connection):
         count_face = collections.Counter(face_list)
         return max(count_face, key=count_face.get)
 
-    # # 発表者デバイスとの通信を切断
-    # if output_copy['finish'] == True:
-    #     sys.exit()
+    # 発表者デバイスとの通信を切断
+    if output_copy['finish'] == True:
+        sys.exit()
 
     # 視聴者の人数を計算
     audience = len(output_copy)
@@ -133,7 +134,7 @@ def to_presenter(msg, address, connection):
             if output_copy[address]['Face']:
                 to_list['ID'][address]['face'] = to_face(address)
 
-    connection.sendto(pickle.dumps(to_list), address)  # メッセージを返します
+        connection.sendto(pickle.dumps(to_list), presenter_address)  # メッセージを返します
 
 
 # 接続済みクライアントは読み込みおよび書き込みを繰り返す
@@ -146,10 +147,8 @@ def loop_handler(connection, client_address):
 
             # 発表者デバイスとの送受信
             if rcvmsg['presenter'] == True:
-                presenter = client_address[0]
-
                 # 送信
-                to_presenter(rcvmsg, presenter, connection)
+                to_presenter(rcvmsg, client_address, connection)
 
             # 視聴者デバイスからの受信
             else:
