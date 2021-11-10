@@ -4,6 +4,7 @@ from paz.backend.camera import VideoPlayer
 from paz.backend.camera import Camera
 from paz.pipelines import detection
 from paz.pipelines import DetectMiniXceptionFER
+
 import threading
 import csv
 import asyncio
@@ -44,9 +45,6 @@ if __name__ == "__main__":
     thread_1.start()
     thread_2.start()
     print('start!')
-
-    # # 顔の表情のセンシング
-    # face_detection()
 
     # スレッドの待ち合わせ処理
     thread_list = threading.enumerate()

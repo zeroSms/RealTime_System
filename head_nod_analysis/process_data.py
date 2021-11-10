@@ -48,6 +48,15 @@ def label_shape(window):
 
     return window_T.T, answer_num
 
+# 頭の動きの検出結果の平滑化
+def smoothie(queue_list):
+    if queue_list.count(1) >= 2:
+        return 1
+    elif queue_list.count(2) >= 2:
+        return 2
+    else:
+        return 0
+
 
 # ============================ データ処理スレッド ============================== #
 # 測定したデータを処理する関数
@@ -62,6 +71,7 @@ def ProcessData():
 
 # 測定したデータを処理する関数
 push_server = []
+queue_list = []
 
 
 def Realtime_analysis(to_server=False, get_face=False):
@@ -76,13 +86,13 @@ def Realtime_analysis(to_server=False, get_face=False):
 
     if to_server:
         host = server_address  # サーバーのホスト名
-        client_address = socket.gethostname()  # クライアント側のホスト名
         port = setup_variable.port  # 49152~65535
 
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # オブジェクトの作成をします
         client.connect((host, port))  # これでサーバーに接続します
 
-        response = {'timeStamp': round(time.time(), 2),
+        response = {'presenter': False,
+                    'timeStamp': round(time.time(), 2),
                     'class': 'Head',
                     }
 
@@ -110,13 +120,16 @@ def Realtime_analysis(to_server=False, get_face=False):
             feature_list = []               # 該当ウィンドウの特徴量リスト初期化
 
             # 頭の動きを可視化(main_Realtime.py)
-            pyautogui.press(str(y_pred[0]))
+            # pyautogui.press(str(y_pred[0]))
 
             # サーバーへの送信
             if to_server:
-                response['action'] = y_pred[0]
-                massage = pickle.dumps(response)
-                client.send(massage)  # データを送信
+                queue_list.append(y_pred[0])
+                if len(queue_list) >= 3:
+                    response['action'] = smoothie(queue_list)
+                    massage = pickle.dumps(response)
+                    client.send(massage)  # データを送信
+                    queue_list.pop(0)
 
     print(realtime_pred)
     print(answer_list)
