@@ -119,7 +119,7 @@ def Realtime_analysis(to_server=False, get_face=False):
             realtime_pred.extend(y_pred)    # 予測結果を追加
             feature_list = []               # 該当ウィンドウの特徴量リスト初期化
 
-            # 頭の動きを可視化(main_Realtime.py)
+            # # 頭の動きを可視化(main_Realtime.py)
             # pyautogui.press(str(y_pred[0]))
 
             # サーバーへの送信
