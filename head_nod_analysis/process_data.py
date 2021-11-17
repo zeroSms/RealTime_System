@@ -27,7 +27,7 @@ realtime_pred = []
 
 # ================================= パスの取得 ================================ #
 path = setup_variable.path
-server_address = '192.168.2.111'
+server_address = setup_variable.server_address
 
 
 # ============================ ラベル整形スレッド ============================== #
@@ -86,7 +86,7 @@ def Realtime_analysis(to_server=False, get_face=False):
 
     if to_server:
         host = server_address  # サーバーのホスト名
-        port = setup_variable.port  # 49152~65535
+        port = setup_variable.audience_port  # 49152~65535
 
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # オブジェクトの作成をします
         client.connect((host, port))  # これでサーバーに接続します
