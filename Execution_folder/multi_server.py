@@ -139,7 +139,10 @@ def loop_handler(connection, client_address):
     while True:
         try:
             # クライアント側から受信する
-            rcvmsg = pickle.loads(connection.recv(4096))
+            rcvmsg = connection.recv(4096)
+            if type(rcvmsg) is bytes:
+                rcvmsg = pickle.loads(rcvmsg)
+                print(rcvmsg)
 
             # 発表者デバイスとの送受信
             if rcvmsg['presenter'] == True:
@@ -169,7 +172,7 @@ def loop_handler(connection, client_address):
 
 def server():
     host = socket.gethostname()  # サーバーのホスト名
-    port = setup_variable.port  # 49152~65535
+    port = setup_variable.audience_port  # 49152~65535
 
     print(host)
     print(socket.gethostbyname(host))
@@ -195,6 +198,7 @@ def server():
         print("\r\n")
         print("[アクセス元アドレス]=>{}".format(client_address[0]))
         print("[アクセス元ポート]=>{}".format(client_address[1]))
+        print(connection)
 
         # 待受中にアクセスしてきたクライアントを追加
         clients.append((connection, client_address))
