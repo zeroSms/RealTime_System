@@ -30,6 +30,8 @@ def Stop(server_num):
 presenter = 0
 clients = []  # クライアント側の接続状況を管理
 output_list, output_log = {}, {}  # 受信リスト
+
+
 # 受信した文字列をJSON形式に整形
 def shape_JSON(msg, address):
     """
@@ -51,6 +53,7 @@ def shape_JSON(msg, address):
     output_log[address][msg['class']][msg['timeStamp']] = msg['action']
     # print(output_list)
 
+
 def to_presenter(msg, presenter_address, connection):
     """
     msg = {'presenter': True,
@@ -64,8 +67,8 @@ def to_presenter(msg, presenter_address, connection):
                       }
                }
     """
-    to_list = {}            # 送信用リスト
-    next_check_list = {}    # 次回繰り越し用リスト（要素数3未満の場合）
+    to_list = {}  # 送信用リスト
+    next_check_list = {}  # 次回繰り越し用リスト（要素数3未満の場合）
 
     # output_listの複製・初期化
     global output_list
@@ -125,10 +128,27 @@ def to_presenter(msg, presenter_address, connection):
         to_list['ID'] = {}
         for address in output_copy.keys():
             to_list['ID'][address] = {}
-            if output_copy[address]['Head']:
-                to_list['ID'][address]['head'] = to_head(address)
-            if output_copy[address]['Face']:
-                to_list['ID'][address]['face'] = to_face(address)
+            # すべての反応をフィードバック
+            if msg['setting'] == True:
+                if output_copy[address]['Head']:
+                    to_list['ID'][address]['head'] = to_head(address)
+                if output_copy[address]['Face']:
+                    to_list['ID'][address]['face'] = to_face(address)
+
+            # ポジティブな反応のみをフィードバック
+            elif msg['setting'] == False:
+                if output_copy[address]['Head']:
+                    head_action = to_head(address)
+                    if head_action == 2:
+                        to_list['ID'][address]['head'] = 0
+                    else:
+                        to_list['ID'][address]['head'] = head_action
+                if output_copy[address]['Face']:
+                    face_action = to_face(address)
+                    if face_action == 'b':
+                        to_list['ID'][address]['face'] = face_action
+                    else:
+                        to_list['ID'][address]['face'] = 'a'
 
         connection.sendto(pickle.dumps(to_list), presenter_address)  # メッセージを返します
 

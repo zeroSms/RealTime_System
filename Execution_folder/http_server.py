@@ -15,32 +15,43 @@ audience_port = setup_variable.audience_port  # 50000
 
 # サーバーへの送信
 response = {'presenter': True,
-            'setting': False,
+            'setting': True,
             'finish': False
             }
 
-def connect_socket():
+def connect_socket(rcvmsg):
     host = server_address  # サーバーのホスト名
     port = setup_variable.audience_port  # 49152~65535
 
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # オブジェクトの作成をします
     client.connect((host, port))  # これでサーバーに接続します
 
+    if rcvmsg['setting'] == 'Feedback.positive':
+        response['setting'] = False
+    print(response)
+
     massage = pickle.dumps(response)
     client.send(massage)  # データを送信
 
     # 集約データを受信
     try:
-        recv_msg = client.recv(4096)
-        print(pickle.loads(recv_msg))
+        send_msg = pickle.loads(client.recv(4096))
+        print(send_msg)
     except Exception as e:
         print(e)
 
-    return recv_msg
+    return send_msg
 
 
 # ================================= サーバ処理 ================================ #
 class MyHTTPRequestHandler(BaseHTTPRequestHandler):
+    def do_OPTIONS(self):
+        self.send_response(200, "ok")
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type")
+        self.end_headers()
+
     def do_GET(self):
         print('path = {}'.format(self.path))
 
@@ -65,15 +76,16 @@ class MyHTTPRequestHandler(BaseHTTPRequestHandler):
         content_length = int(self.headers['content-length'])
 
         rcvmsg = self.rfile.read(content_length).decode('utf-8')
+        rcvmsg = json.loads(rcvmsg)
         print('body = {}'.format(rcvmsg))
 
         # 視聴者側サーバとの送受信
-        send_msg = connect_socket()
+        send_msg = connect_socket(rcvmsg)
 
         self.send_response(200)
         self.send_header('Content-Type', 'application/json')
         self.end_headers()
-        self.wfile.write(send_msg)
+        self.wfile.write(json.dumps(send_msg).encode())
 
 
 with HTTPServer((server_address, presenter_port), MyHTTPRequestHandler) as server:
