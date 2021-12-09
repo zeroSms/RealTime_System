@@ -8,7 +8,8 @@ import os
 import shutil
 
 # 自作ライブラリ
-from head_nod_analysis import add_data, process_data, get_address, setup_variable, view_Realtime_head
+from head_nod_analysis import add_data, process_data, get_address, setup_variable
+from head_nod_analysis.enter_label import Label
 from head_nod_analysis.stop import Stop
 
 # ================================= パスの取得 ================================ #
@@ -49,13 +50,13 @@ def main():
     thread_1 = threading.Thread(target=add_data.AddData, args=(address, loop,))
     thread_2 = threading.Thread(target=process_data.Realtime_analysis, args=(server, False))
     thread_3 = threading.Thread(target=Stop)
+    thread_4 = threading.Thread(target=Label)
 
     thread_1.start()
     thread_2.start()
     thread_3.start()
+    thread_4.start()
     print('start!')
-
-    # view_Realtime_head.view_action()
 
     # スレッドの待ち合わせ処理
     thread_list = threading.enumerate()

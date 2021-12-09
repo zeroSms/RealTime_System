@@ -50,9 +50,9 @@ def label_shape(window):
 
 # 頭の動きの検出結果の平滑化
 def smoothie(queue_list):
-    if queue_list.count(1) >= 2:
+    if queue_list.count('1') >= 2:
         return 1
-    elif queue_list.count(2) >= 2:
+    elif queue_list.count('2') >= 2:
         return 2
     else:
         return 0
@@ -78,10 +78,10 @@ def Realtime_analysis(to_server=False, get_face=False):
     global window_num, feature_list, push_server
 
     # 特徴量リスト
-    clf = pickle.load(open(path + '\\data_set\\analysis_files\\102\\trained_model.pkl', 'rb'))
-    sensor_name = 'gyro'
+    clf = pickle.load(open(path + '\\data_set\\analysis_files\\main\\trained_model.pkl', 'rb'))
+    sensor_name = 'all'
     get_feature.feature_name(sensor_name)
-    filename = path + '\\data_set\\analysis_files\\102\\feature_list_selection.csv'
+    filename = path + '\\data_set\\analysis_files\\feature_selection\\all\\None\\feature_list_selection0.csv'
     selection_X = pd.read_csv(filename)
 
     if to_server:
@@ -104,7 +104,7 @@ def Realtime_analysis(to_server=False, get_face=False):
 
             # ウィンドウラベルの付与，正解ラベルデータの作成
             result_window, answer_num = label_shape(window)
-            answer_list.append(answer_num)
+            answer_list.append(str(answer_num))
             analysis_csv.extend(result_window)
 
             # リアルタイム行動分析-特徴量抽出
@@ -126,7 +126,9 @@ def Realtime_analysis(to_server=False, get_face=False):
             if to_server:
                 queue_list.append(y_pred[0])
                 if len(queue_list) >= 3:
+                    response['timeStamp'] = round(time.time(), 2)
                     response['action'] = smoothie(queue_list)
+                    print(queue_list, smoothie(queue_list))
                     massage = pickle.dumps(response)
                     client.send(massage)  # データを送信
                     queue_list.pop(0)
@@ -134,5 +136,10 @@ def Realtime_analysis(to_server=False, get_face=False):
     print(realtime_pred)
     print(answer_list)
     test_y = pd.Series(data=answer_list)
+    y_pred = pd.Series(data=realtime_pred)
+    print(classification_report(test_y, y_pred, target_names=['others', 'nod', 'shake']))
+
+    realtime_pred.pop(0)
+    realtime_pred.append('0')
     y_pred = pd.Series(data=realtime_pred)
     print(classification_report(test_y, y_pred, target_names=['others', 'nod', 'shake']))

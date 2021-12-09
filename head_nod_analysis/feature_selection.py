@@ -6,10 +6,10 @@ from sklearn.ensemble import RandomForestClassifier
 
 
 class Wrapper_Method:
-    def __init__(self, clf, X, y, make_file, ex_num):
+    def __init__(self, clf, X, y, make_file):
         self.clf = clf
         self.X, self.y = X, y
-        self.make_file, self.ex_num = make_file, ex_num
+        self.make_file = make_file
 
     def RFE_CV(self):
         # 特徴量削減
@@ -19,7 +19,7 @@ class Wrapper_Method:
                              columns=self.X.columns.values[selector.get_support()])
         result = pd.DataFrame(selector.get_support(), index=self.X.columns.values, columns=['False: dropped'])
         result['ranking'] = selector.ranking_
-        result.to_csv(self.make_file + '\\feature_rank' + str(self.ex_num) + '.csv')
+        result.to_csv(self.make_file + '\\feature_rank.csv')
 
         # Plot number of features VS. cross-validation scores
         fig = plt.figure()
@@ -28,23 +28,23 @@ class Wrapper_Method:
         plt.plot(range(min_features_select,
                        len(selector.grid_scores_) + min_features_select),
                  selector.grid_scores_)
-        fig.savefig(self.make_file + '\\features_score' + str(self.ex_num) + '.png')
+        fig.savefig(self.make_file + '\\features_score.png')
         return X_new
 
 
 class Embedded_Method:
-    def __init__(self, clf, X, y, make_file, ex_num):
+    def __init__(self, clf, X, y, make_file):
         self.clf = clf
         self.X, self.y = X, y
-        self.make_file, self.ex_num = make_file, ex_num
+        self.make_file = make_file
 
     def SFM(self):
         # 特徴量削減
-        selector = SelectFromModel(self.clf, threshold=0.01)  # 閾値以上の特徴量を選択
+        selector = SelectFromModel(self.clf, threshold='median')  # 閾値以上の特徴量を選択
         X_new = pd.DataFrame(selector.fit_transform(self.X, self.y),
                              columns=self.X.columns.values[selector.get_support()])
         result = pd.DataFrame(selector.get_support(), index=self.X.columns.values, columns=['False: dropped'])
         result['featureImportances'] = selector.estimator_.feature_importances_
-        result.to_csv(self.make_file + '\\feature_rank' + str(self.ex_num) + '.csv')
+        result.to_csv(self.make_file + '\\feature_rank.csv')
 
         return X_new
