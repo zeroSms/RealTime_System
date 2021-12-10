@@ -57,7 +57,7 @@ if __name__ == '__main__':
     feature_check = input('特徴量選択[1/2/n]：')  # 1: RFE_CV  2: SFM
     over_sampling = input('オーバーサンプリング[1/2/3/4/n]：')  # 1: RFE_CV  2: SFM
     if feature_check == '2':
-        SFM_threshold = input('SFM閾値[001/mid]：')
+        SFM_threshold = input('SFM閾値[001/%]：')
     else:
         SFM_threshold = ''
 
@@ -77,7 +77,7 @@ if __name__ == '__main__':
     if feature_check == '1':
         analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\RFE_CV'
     elif feature_check == '2':
-        analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\SFM_' + SFM_threshold
+        analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\SFM\\SFM_' + SFM_threshold
     else:
         analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\None'
 

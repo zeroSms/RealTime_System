@@ -74,7 +74,7 @@ push_server = []
 queue_list = []
 
 
-def Realtime_analysis(to_server=False, get_face=False):
+def Realtime_analysis(to_server=False, port_select='1'):
     global window_num, feature_list, push_server
 
     # 特徴量リスト
@@ -86,7 +86,7 @@ def Realtime_analysis(to_server=False, get_face=False):
 
     if to_server:
         host = server_address  # サーバーのホスト名
-        port = setup_variable.audience_port  # 49152~65535
+        port = setup_variable.port_num[port_select]['audience']
 
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # オブジェクトの作成をします
         client.connect((host, port))  # これでサーバーに接続します
@@ -128,7 +128,6 @@ def Realtime_analysis(to_server=False, get_face=False):
                 if len(queue_list) >= 3:
                     response['timeStamp'] = round(time.time(), 2)
                     response['action'] = smoothie(queue_list)
-                    print(queue_list, smoothie(queue_list))
                     massage = pickle.dumps(response)
                     client.send(massage)  # データを送信
                     queue_list.pop(0)

@@ -16,11 +16,11 @@ server_address = setup_variable.server_address
 
 
 # ================================= 表情の決定・通信 ================================ #
-def client_face(to_server=False):
+def client_face(to_server=False, port_select='1'):
     if to_server:
         host = server_address  # サーバーのホスト名
         client_address = socket.gethostname()  # クライアント側のホスト名
-        port = setup_variable.audience_port  # 49152~65535
+        port = setup_variable.port_num[port_select]['audience']
 
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # オブジェクトの作成をします
         client.connect((host, port))  # これでサーバーに接続します

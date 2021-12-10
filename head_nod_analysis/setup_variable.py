@@ -5,11 +5,15 @@
 
 # ================================= パスの取得 ================================ #
 import os
+
 path = os.getcwd().rsplit('\\', 1)[0]
 server_address = '192.168.2.111'
-presenter_port = 5000  # 49152~65535
-audience_port = 50000  # 49152~65535
-
+port_num = {'1': {'presenter': 5001,
+                'audience': 50001},
+            '2': {'presenter': 5002,
+                'audience': 50002},
+            '3': {'presenter': 5003,
+                'audience': 50003}}
 
 # ============================ 変数宣言部 ============================== #
 # 分析用データのラベル
@@ -28,17 +32,18 @@ axis_columns = ['acc_X', 'acc_Y', 'acc_Z',
 acc_columns = ['acc_X', 'acc_Y', 'acc_Z', 'acc_xyz']
 gyro_columns = ['gyro_X', 'gyro_Y', 'gyro_Z']
 
+
 # 表情の文字列を記号に変換
 def face_symbol(pred_face):
     face_dict = {
-        'neutral'   : 'a',
-        'happy'     : 'b',
-        'surprise'  : 'c',
-        'sad'       : 'd',
-        'angry'     : 'e',
-        'fear'      : 'f',
-        'disgust'   : 'g',
-        'null'      : 'z'
+        'neutral': 'a',
+        'happy': 'b',
+        'surprise': 'c',
+        'sad': 'd',
+        'angry': 'e',
+        'fear': 'f',
+        'disgust': 'g',
+        'null': 'z'
     }
     return face_dict[pred_face]
 

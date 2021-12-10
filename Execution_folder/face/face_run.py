@@ -15,7 +15,7 @@ from head_nod_analysis.stop import Stop
 from head_nod_analysis.enter_label import Label
 
 
-def face_detection():
+def face_detection(ex_num):
     parser = argparse.ArgumentParser(description='Real-time face classifier')
     parser.add_argument('-c', '--camera_id', type=int, default=0,
                         help='Camera device ID')
@@ -25,20 +25,21 @@ def face_detection():
 
     pipeline = DetectMiniXceptionFER([args.offset, args.offset])
     camera = Camera(args.camera_id)
-    player = VideoPlayer((640, 480), pipeline, camera)
+    player = VideoPlayer((640, 480), pipeline, camera, ex_num)
     player.record()
 
 
 if __name__ == "__main__":
     ex_num = input('実験番号：')
+    port_select = input('ポート番号[1/2/3]：')
     if input('サーバ通信[y/n]：') == 'y':
         server = True
     else: server = False
 
     # 頭の動きのセンシング　スレッド開始
     loop = asyncio.new_event_loop()
-    thread = threading.Thread(target=face_detection)
-    thread_1 = threading.Thread(target=client_face.client_face, args=(server,))
+    thread = threading.Thread(target=face_detection, args=(ex_num,))
+    thread_1 = threading.Thread(target=client_face.client_face, args=(server, port_select,))
     thread_2 = threading.Thread(target=Stop)
 
     thread.start()

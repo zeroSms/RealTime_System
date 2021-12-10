@@ -39,6 +39,7 @@ def getCsv_analysis(realtime_file, ex_num):
 # メイン関数
 def main():
     ex_num = input('実験番号：')
+    port_select = input('ポート番号[1/2/3]：')
     if input('サーバ通信[y/n]：') == 'y':
         server = True
     else: server = False
@@ -48,7 +49,7 @@ def main():
 
     loop = asyncio.new_event_loop()
     thread_1 = threading.Thread(target=add_data.AddData, args=(address, loop,))
-    thread_2 = threading.Thread(target=process_data.Realtime_analysis, args=(server, False))
+    thread_2 = threading.Thread(target=process_data.Realtime_analysis, args=(server, port_select,))
     thread_3 = threading.Thread(target=Stop)
     thread_4 = threading.Thread(target=Label)
 

@@ -117,10 +117,11 @@ class VideoPlayer(object):
         record()
     """
 
-    def __init__(self, image_size, pipeline, camera):
+    def __init__(self, image_size, pipeline, camera, ex_num):
         self.image_size = image_size
         self.pipeline = pipeline
         self.camera = camera
+        self.ex_num = ex_num
 
     def step(self):
         """ Runs the pipeline process once
@@ -157,7 +158,7 @@ class VideoPlayer(object):
         self.camera.stop()
         cv2.destroyAllWindows()
 
-    def record(self, name=path + '/video/video.avi', fps=20, fourCC='DIVX'):
+    def record(self, fps=20, fourCC='DIVX'):
         """Opens camera and records continuous inference using ``pipeline``.
 
         # Arguments
@@ -169,7 +170,8 @@ class VideoPlayer(object):
         global face_list
         self.camera.start()
         fourCC = cv2.VideoWriter_fourcc(*fourCC)
-        writer = cv2.VideoWriter(name, fourCC, fps, self.image_size)
+        print(path)
+        writer = cv2.VideoWriter(path + '/face/video/video'+self.ex_num+'.avi', fourCC, fps, self.image_size)
         while True:
             output = self.step()
             if output is None:
