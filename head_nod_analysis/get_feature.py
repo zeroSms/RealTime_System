@@ -1,8 +1,6 @@
 #
 # 特徴量計算スレッド
 #
-import math
-
 import numpy as np
 import pandas as pd
 from scipy.fft import rfft, fft

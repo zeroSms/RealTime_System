@@ -97,9 +97,10 @@ def process_window():
             # 各キーの最大値を取得
             for k in face_list.keys():
                 max_key[k] = max(face_list[k])
+            print(max_key)
 
             face_list = {}
-            return max(max_key, key=max_key.get)
+            return max(max_key.items(), key=lambda x: x[1])
 
 
 class VideoPlayer(object):
@@ -170,7 +171,6 @@ class VideoPlayer(object):
         global face_list
         self.camera.start()
         fourCC = cv2.VideoWriter_fourcc(*fourCC)
-        print(path)
         writer = cv2.VideoWriter(path + '/face/video/video'+self.ex_num+'.avi', fourCC, fps, self.image_size)
         while True:
             output = self.step()

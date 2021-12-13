@@ -40,7 +40,7 @@ class Embedded_Method:
 
     def SFM(self):
         # 特徴量削減
-        selector = SelectFromModel(self.clf, threshold=0.001709)  # 閾値以上の特徴量を選択
+        selector = SelectFromModel(self.clf, threshold=0.01)  # 閾値以上の特徴量を選択
         X_new = pd.DataFrame(selector.fit_transform(self.X, self.y),
                              columns=self.X.columns.values[selector.get_support()])
         result = pd.DataFrame(selector.get_support(), index=self.X.columns.values, columns=['False: dropped'])

@@ -1,7 +1,6 @@
 #
 # 表情の決定と通信処理
 #
-import json
 import time
 import socket
 import pickle
@@ -42,7 +41,8 @@ def client_face(to_server=False, port_select='1'):
         # サーバーへの送信
         if to_server:
             response['timeStamp'] = round(timeStamp, 2)
-            response['action'] = setup_variable.face_symbol(pred_face)
+            # response['action'] = setup_variable.face_symbol(pred_face[0])
+            response['action'] = pred_face
             massage = pickle.dumps(response)
             client.send(massage)  # データを送信
 

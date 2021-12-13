@@ -8,6 +8,8 @@ import os
 import shutil
 
 # 自作ライブラリ
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 from head_nod_analysis import add_data, process_data, get_address, setup_variable
 from head_nod_analysis.enter_label import Label
 from head_nod_analysis.stop import Stop
@@ -39,13 +41,16 @@ def getCsv_analysis(realtime_file, ex_num):
 # メイン関数
 def main():
     ex_num = input('実験番号：')
-    port_select = input('ポート番号[1/2/3]：')
+    eSense_num = input('eSenseの番号[1-8]：')
     if input('サーバ通信[y/n]：') == 'y':
+        port_select = input('サーバ番号[1/2/3]：')
         server = True
-    else: server = False
+    else:
+        port_select = '1'
+        server = False
 
     # eSenseのアドレスを取得
-    address = get_address.Get()
+    address = get_address.Get(int(eSense_num))
 
     loop = asyncio.new_event_loop()
     thread_1 = threading.Thread(target=add_data.AddData, args=(address, loop,))

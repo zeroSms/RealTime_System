@@ -1,18 +1,17 @@
 import argparse
-from paz.backend import camera as FS
-from paz.backend.camera import VideoPlayer
-from paz.backend.camera import Camera
-from paz.pipelines import detection
-from paz.pipelines import DetectMiniXceptionFER
-
-import threading
-import csv
 import asyncio
+import threading
 
 # 自作ライブラリ
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+
 from head_nod_analysis import client_face
 from head_nod_analysis.stop import Stop
-from head_nod_analysis.enter_label import Label
+
+from paz.backend.camera import Camera
+from paz.backend.camera import VideoPlayer
+from paz.pipelines import DetectMiniXceptionFER
 
 
 def face_detection(ex_num):
@@ -31,10 +30,12 @@ def face_detection(ex_num):
 
 if __name__ == "__main__":
     ex_num = input('実験番号：')
-    port_select = input('ポート番号[1/2/3]：')
     if input('サーバ通信[y/n]：') == 'y':
+        port_select = input('サーバ番号[1/2/3]：')
         server = True
-    else: server = False
+    else:
+        port_select = '1'
+        server = False
 
     # 頭の動きのセンシング　スレッド開始
     loop = asyncio.new_event_loop()

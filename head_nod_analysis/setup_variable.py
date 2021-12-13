@@ -15,6 +15,9 @@ port_num = {'1': {'presenter': 5001,
             '3': {'presenter': 5003,
                 'audience': 50003}}
 
+eSense_name = ['eSense-0220', 'eSense-0328', 'eSense-0376', 'eSense-0459', 'eSense-0498', 'eSense-0586', 'eSense-0592', 'eSense-0666']
+
+
 # ============================ 変数宣言部 ============================== #
 # 分析用データのラベル
 process_columns = ['window_ID', 'timeStamp',
@@ -59,5 +62,5 @@ FOLD = 10  # 交差検証数
 
 # ランダムフォレストパラメータ
 max_depth = 30
-n_estimators = 30
+n_estimators = 20
 random_state = 42

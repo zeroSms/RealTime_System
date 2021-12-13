@@ -7,17 +7,11 @@ import collections
 import pandas as pd
 import socket
 import pickle
-import pyautogui
 
-from sklearn.decomposition import PCA
-from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 
 # 自作ライブラリ
 from . import add_data, get_feature, setup_variable, stop
-from paz.backend import camera as CML
 
 analysis_csv = [setup_variable.analysis_columns]  # windowデータの追加
 answer_list = []  # 正解データリスト（windowごと）
@@ -81,7 +75,7 @@ def Realtime_analysis(to_server=False, port_select='1'):
     clf = pickle.load(open(path + '\\data_set\\analysis_files\\main\\trained_model.pkl', 'rb'))
     sensor_name = 'all'
     get_feature.feature_name(sensor_name)
-    filename = path + '\\data_set\\analysis_files\\feature_selection\\all\\None\\feature_list_selection0.csv'
+    filename = path + '\\data_set\\analysis_files\\feature_selection\\all\\SFM\\SFM_35\\feature_list_selection0.csv'
     selection_X = pd.read_csv(filename)
 
     if to_server:
@@ -124,13 +118,10 @@ def Realtime_analysis(to_server=False, port_select='1'):
 
             # サーバーへの送信
             if to_server:
-                queue_list.append(y_pred[0])
-                if len(queue_list) >= 3:
-                    response['timeStamp'] = round(time.time(), 2)
-                    response['action'] = smoothie(queue_list)
-                    massage = pickle.dumps(response)
-                    client.send(massage)  # データを送信
-                    queue_list.pop(0)
+                response['timeStamp'] = round(time.time(), 2)
+                response['action'] = int(y_pred[0])
+                massage = pickle.dumps(response)
+                client.send(massage)  # データを送信
 
     print(realtime_pred)
     print(answer_list)

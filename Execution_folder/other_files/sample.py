@@ -2,5 +2,7 @@ import numpy as np
 import pandas as pd
 
 
-for i in range(0, 101, 5):
-    print(i)
+msg = {'1': (1, 2),
+       '2': (2, 3)}
+msg_list = list(msg.values())
+print(msg_list[0][0])

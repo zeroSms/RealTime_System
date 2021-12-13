@@ -36,6 +36,7 @@ def sampling_byte():
     return byte_sample
 
 # eSenseのアドレスを取得
+eSense_name = setup_variable.eSense_name
 async def search_eSense():
     global eSense_address
     eSense_flg = True

@@ -20,7 +20,7 @@ def Stop(server_num):
     print("stop!\n")
 
     # ログファイルの出力
-    with open('../server_files/server_log/' + server_num + '.json', 'w') as f:
+    with open('../../server_files/server_log/' + server_num + '.json', 'w') as f:
         json.dump(output_log, f, indent=4)
     sys.exit()
 
@@ -33,6 +33,7 @@ output_list, output_log = {}, {}  # 受信リスト
 
 # 受信した文字列をJSON形式に整形
 def shape_JSON(msg, address):
+    global output_list, output_log
     """
     msg = {'timeStamp',
            'class': 'Head' or 'Face'
@@ -47,10 +48,9 @@ def shape_JSON(msg, address):
     """
     if address not in output_list:
         output_list[address] = {'Head': {}, 'Face': {}}
-        output_log[address] = {'Head': {}, 'Face': {}}
-    output_list[address][msg['class']][msg['timeStamp']] = msg['action']
-    output_log[address][msg['class']][msg['timeStamp']] = msg['action']
-    # print(output_list)
+        # output_log[address] = {'Head': {}, 'Face': {}}
+    output_list[address][msg['class']][str(time.time())] = msg['action']
+    # output_log[address][msg['class']][str(time.time())] = msg['action']
 
 
 def to_presenter(msg, presenter_address, connection):
@@ -98,11 +98,24 @@ def to_presenter(msg, presenter_address, connection):
         else:
             return 0
 
+    # # 各ユーザの表情の決定
+    # def to_face(address):
+    #     face_list = list(output_copy[address]['Face'].values())
+    #     count_face = collections.Counter(face_list)
+    #     return max(count_face, key=count_face.get)
     # 各ユーザの表情の決定
     def to_face(address):
-        face_list = output_copy[address]['Face'].values()
-        count_face = collections.Counter(face_list)
-        return max(count_face, key=count_face.get)
+        face_list = list(output_copy[address]['Face'].values())
+        max_num = 0.0
+        max_face = 'a'
+        for face_score in face_list:
+            if face_score != 'null' and face_score[0] != 'nuetral' and face_score[1] > max_num:
+                max_face = face_score[0]
+                max_num = face_score[1]
+        if max_num > 0.4:
+            return setup_variable.face_symbol(max_face)
+        else:
+            return 'a'
 
     # 視聴者の人数を計算
     audience = len(output_copy)
@@ -111,6 +124,11 @@ def to_presenter(msg, presenter_address, connection):
         to_list['ID'] = {}
         for address in output_copy.keys():
             to_list['ID'][address] = {}
+
+            # 発表者へ送ったフィードバック内容の記録
+            if address not in output_log:
+                output_log[address] = {'Head': {}, 'Face': {}}
+
             # すべての反応をフィードバック
             if msg['setting'] == True:
                 if output_copy[address]['Head']:
@@ -142,6 +160,11 @@ def to_presenter(msg, presenter_address, connection):
                 else:
                     to_list['ID'][address]['face'] = 'a'
 
+            timeStamp = str(time.time())
+            output_log[address]['Head'][timeStamp] = to_list['ID'][address]['head']
+            output_log[address]['Face'][timeStamp] = to_list['ID'][address]['face']
+
+        print(to_list)
         connection.sendto(pickle.dumps(to_list), presenter_address)  # メッセージを返します
 
 
@@ -153,7 +176,6 @@ def loop_handler(connection, client_address):
             rcvmsg = connection.recv(4096)
             if type(rcvmsg) is bytes:
                 rcvmsg = pickle.loads(rcvmsg)
-                print(rcvmsg)
 
             # 発表者デバイスとの送受信
             if rcvmsg['presenter'] == True:

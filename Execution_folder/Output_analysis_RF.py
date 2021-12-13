@@ -4,7 +4,6 @@
 import csv
 import glob
 import os
-import pickle
 import shutil
 import time
 
@@ -20,7 +19,6 @@ from sklearn.metrics import classification_report
 
 # 図の描画
 import matplotlib.pyplot as plt
-from head_nod_analysis import view_Confusion_matrix
 import seaborn as sns
 
 sns.set_style('whitegrid', {'linestyle.grid': '--'})
@@ -82,6 +80,7 @@ if __name__ == '__main__':
     # 最適なパラメータの探索
     score_list = []
     predict_time_list = []
+    roop = 0
     for max_depth in param_grid['max_depth']:
         score_list.append([])
         predict_time_list.append([])
@@ -102,19 +101,22 @@ if __name__ == '__main__':
             score_list[-1].append(test_score['macro avg']['f1-score'])
             predict_time_list[-1].append(elapsed_time)
 
+            roop += 1
+            print(roop)
+
     # ヒートマップ
     plt.figure()
     df = pd.DataFrame(data=score_list, index=param_grid['max_depth'], columns=param_grid['n_estimators'])
     sns.heatmap(df, cmap='Blues', annot=True, fmt='.3g', square=True)
-    plt.xlabel('max_depth')
-    plt.ylabel('n_estimators')
+    plt.xlabel('n_estimators')
+    plt.ylabel('max_depth')
     plt.savefig(make_file+'\\heatmap_f1-score')
 
     plt.figure()
     df = pd.DataFrame(data=predict_time_list, index=param_grid['max_depth'], columns=param_grid['n_estimators'])
     sns.heatmap(df, cmap='Blues', annot=True, fmt='.3g', square=True)
-    plt.xlabel('max_depth')
-    plt.ylabel('n_estimators')
+    plt.xlabel('n_estimators')
+    plt.ylabel('max_depth')
     plt.savefig(make_file+'\\heatmap_predict_time')
 
     # パラメータの出力
