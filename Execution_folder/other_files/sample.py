@@ -1,8 +1,9 @@
-import numpy as np
-import pandas as pd
+import asyncio
+from bleak import BleakScanner
 
+async def main():
+    devices = await BleakScanner.discover()
+    for d in devices:
+        print(d)
 
-msg = {'1': (1, 2),
-       '2': (2, 3)}
-msg_list = list(msg.values())
-print(msg_list[0][0])
+asyncio.run(main())
