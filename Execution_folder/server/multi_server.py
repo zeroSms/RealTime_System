@@ -90,7 +90,7 @@ def to_presenter(msg, presenter_address, connection):
         count_1 = head_list.count(1)
         count_2 = head_list.count(2)
         if count_1 == count_2 and count_1 > 0:
-            return 1
+            return 3
         elif count_1 > count_2:
             return 1
         elif count_2 > count_1:
@@ -109,10 +109,6 @@ def to_presenter(msg, presenter_address, connection):
         max_num = 0.0
         max_face = 'z'
         for face_score in face_list:
-            # ポジティブな反応のみの場合，喜び以外は通さずfor文の先頭へ
-            if setting == False and face_score[0] != 'happy':
-                continue
-
             if face_score != 'null' and face_score[0] != 'nuetral' and face_score[1] > max_num:
                 max_face = face_score[0]
                 max_num = face_score[1]
