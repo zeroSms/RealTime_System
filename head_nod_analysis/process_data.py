@@ -109,7 +109,7 @@ def Realtime_analysis(to_server=False, port_select='1'):
             test_x = test_x.values
 
             y_pred = clf.predict(test_x)    # 頭の動きを判定
-            print(y_pred, answer_num)       # 判定された行動の出力
+            print(time.time(), y_pred, answer_num)       # 判定された行動の出力
             realtime_pred.extend(y_pred)    # 予測結果を追加
             feature_list = []               # 該当ウィンドウの特徴量リスト初期化
 

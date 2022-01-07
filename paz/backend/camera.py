@@ -1,3 +1,5 @@
+import time
+
 import cv2
 
 from ..backend.image import resize_image, convert_color_space, show_image
@@ -86,6 +88,8 @@ class Camera(object):
 # face_listを初期化
 face_list = {}
 SCORE, NAME = 0, 1  # face_listの第1引数
+
+
 def process_window():
     global face_list
     max_key = {}
@@ -171,7 +175,7 @@ class VideoPlayer(object):
         global face_list
         self.camera.start()
         fourCC = cv2.VideoWriter_fourcc(*fourCC)
-        writer = cv2.VideoWriter(path + '/face/video/video'+self.ex_num+'.avi', fourCC, fps, self.image_size)
+        writer = cv2.VideoWriter(path + '/face/video/video' + self.ex_num + '.avi', fourCC, fps, self.image_size)
         while True:
             output = self.step()
             if output is None:
@@ -182,10 +186,12 @@ class VideoPlayer(object):
                 box2D = output['boxes2D'][0]
                 # print(output)
                 face_name = box2D.class_name
+                print(time.time(), face_name)
                 if face_name not in face_list:
                     face_list[face_name] = []
                 face_list[face_name].append(box2D.score)
-            # print(face_list)
+            else:
+                print(time.time(), 'null')
 
             image = resize_image(output['image'], tuple(self.image_size))
             show_image(image, 'inference', wait=False)

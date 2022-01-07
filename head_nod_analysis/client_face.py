@@ -36,7 +36,7 @@ def client_face(to_server=False, port_select='1'):
 
         # 判定された表情の出力
         pred_face = CML.process_window()
-        print(pred_face)
+        # print(timeStamp, pred_face)
 
         # サーバーへの送信
         if to_server:
