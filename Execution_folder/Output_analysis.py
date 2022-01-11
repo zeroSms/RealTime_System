@@ -71,7 +71,9 @@ if __name__ == '__main__':
     random_state = setup_variable.random_state
     max_depth = setup_variable.max_depth
     n_estimators = setup_variable.n_estimators
-    clf = RandomForestClassifier(max_depth=max_depth, n_estimators=n_estimators, random_state=random_state)
+    # clf = RandomForestClassifier(max_depth=max_depth, n_estimators=n_estimators, random_state=random_state)
+    clf = RandomForestClassifier(random_state=random_state)
+
 
 
     # 特徴量選択
@@ -135,7 +137,7 @@ if __name__ == '__main__':
 
     # 交差検証結果（平均）
     df = pd.DataFrame(test_score).T
-    df = df.round(2)
+    df = df.round(3)
     df = df.astype({'support': 'int'})
     df['sum_fit_time'] = sum(scores['fit_time'])
     df.to_csv(make_file + '\\result_score' + str(ex_num) + '.csv')

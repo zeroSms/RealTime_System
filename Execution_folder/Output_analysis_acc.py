@@ -124,7 +124,7 @@ if __name__ == '__main__':
 
     # 交差検証結果（平均）
     df = pd.DataFrame(test_score).T
-    df = df.round(2)
+    df = df.round(3)
     df = df.astype({'support': 'int'})
     df['sum_fit_time'] = sum(scores['fit_time'])
     df.to_csv(make_file + '\\result_score' + str(ex_num) + '.csv')

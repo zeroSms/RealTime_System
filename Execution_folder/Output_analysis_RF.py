@@ -130,3 +130,8 @@ if __name__ == '__main__':
         writer = csv.writer(f)
         for k, v in paramater.items():
             writer.writerow([k, v])
+
+    with open(make_file + '\\predict_time' + str(ex_num) + '.csv', 'w', newline='') as f:
+        writer = csv.writer(f)
+        for k, v in paramater.items():
+            writer.writerow([k, v])

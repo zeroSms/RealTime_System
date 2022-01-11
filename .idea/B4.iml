@@ -11,6 +11,7 @@
     <option name="namespacePackageFolders">
       <list>
         <option value="$MODULE_DIR$/head_nod_analysis" />
+        <option value="$MODULE_DIR$/Execution_folder" />
       </list>
     </option>
   </component>
