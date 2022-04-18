@@ -16,6 +16,7 @@ T = setup_variable.T  # サンプリング周期 [Hz]
 N = setup_variable.N  # ウィンドウサイズ(0.64秒)
 OVERLAP = setup_variable.OVERLAP  # オーバーラップ率 [%]
 byte_sample = bytearray([0x53, 0x03, 0x02, 0x01, 0x00])  # UUID7　書き込み用バイト（サンプリング開始）
+byte_interval = bytearray([0x57, 0x07, 0x08, 0x03, 0xe8, 0x04, 0xb0, 0x00, 0x28, 0x00, 0x38])  # UUID7　書き込み用バイト（接続間隔）
 eSense_address = 0
 w = []
 data_queue = []  # 分析用データ格納
@@ -90,6 +91,7 @@ class Sensor:
 
             # サンプリング開始
             await client.write_gatt_char(UUID7, sampling_byte(), response=True)
+            await client.write_gatt_char(UUID7, byte_interval, response=True)
 
             await client.start_notify(UUID8, Sensor.callback)
 

@@ -53,7 +53,7 @@ def output_files(X):
 # ウィンドウ単位の処理用定数
 T = setup_variable.T  # サンプリング周期 [Hz]
 # N = setup_variable.N  # ウィンドウサイズ
-N = 8
+N = 128
 OVERLAP = setup_variable.OVERLAP  # オーバーラップ率 [%]
 window_data = []
 get_window = []
@@ -119,7 +119,7 @@ def clean_data_files():
 
 # 各ファイルごとにウィンドウ処理を実行，結果をCSV出力
 def do_process_window():
-    # clean_data_files()
+    clean_data_files()
 
     # CSVファイル出力
     glob_file = path + '\\data_set\\analysis_files\\data_files\\value_list*.csv'
