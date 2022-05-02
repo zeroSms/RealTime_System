@@ -96,7 +96,7 @@ if __name__ == '__main__':
             elapsed_time = time.time() - start
 
             # 予測結果リストの出力
-            test_score = classification_report(y, y_pred, target_names=['others', 'nod', 'shake'], output_dict=True)
+            test_score = classification_report(y, y_pred, target_names=['others', 'nod', 'shake'], digits=3, output_dict=True)
 
             score_list[-1].append(test_score['macro avg']['f1-score'])
             predict_time_list[-1].append(elapsed_time)
@@ -127,6 +127,11 @@ if __name__ == '__main__':
                  'ウィンドウラベル閾値': setup_variable.threshold,
                  'random_state': setup_variable.random_state}
     with open(make_file + '\\paramater' + str(ex_num) + '.csv', 'w', newline='') as f:
+        writer = csv.writer(f)
+        for k, v in paramater.items():
+            writer.writerow([k, v])
+
+    with open(make_file + '\\predict_time' + str(ex_num) + '.csv', 'w', newline='') as f:
         writer = csv.writer(f)
         for k, v in paramater.items():
             writer.writerow([k, v])

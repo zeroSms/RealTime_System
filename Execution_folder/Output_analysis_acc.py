@@ -117,14 +117,14 @@ if __name__ == '__main__':
 
     # 層化k分割交差検証(予測結果リストの出力)
     y_pred = cross_val_predict(classifer, X_value, y, cv=stratifiedkfold)
-    test_score = classification_report(y, y_pred, target_names=['others', 'nod', 'shake'], output_dict=True)
+    test_score = classification_report(y, y_pred, target_names=['others', 'nod', 'shake'], digits=3, output_dict=True)
 
     # 混同行列
     view_Confusion_matrix.print_cmx(y, y_pred, make_file, ex_num)
 
     # 交差検証結果（平均）
     df = pd.DataFrame(test_score).T
-    df = df.round(2)
+    df = df.round(3)
     df = df.astype({'support': 'int'})
     df['sum_fit_time'] = sum(scores['fit_time'])
     df.to_csv(make_file + '\\result_score' + str(ex_num) + '.csv')

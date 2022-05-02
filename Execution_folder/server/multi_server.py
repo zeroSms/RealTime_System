@@ -12,7 +12,7 @@ import time
 from head_nod_analysis import setup_variable, stop
 
 
-# ============================ 正常終了スレッド ============================== #
+# ============================ 正常終了スレッド ============================== #se
 # プログラムを正常に終了するための関数
 def Stop(server_num):
     # エンターが入力されるまで待ち続ける
@@ -104,15 +104,17 @@ def to_presenter(msg, presenter_address, connection):
     #     count_face = collections.Counter(face_list)
     #     return max(count_face, key=count_face.get)
     # 各ユーザの表情の決定
-    def to_face(address):
+    def to_face(address, setting=True):
         face_list = list(output_copy[address]['Face'].values())
         max_num = 0.0
-        max_face = 'a'
+        max_face = 'z'
         for face_score in face_list:
             if face_score != 'null' and face_score[0] != 'nuetral' and face_score[1] > max_num:
                 max_face = face_score[0]
                 max_num = face_score[1]
-        if max_num > 0.4:
+        if max_face == 'z':
+            return 'z'
+        if max_num > 0.3:
             return setup_variable.face_symbol(max_face)
         else:
             return 'a'
@@ -152,7 +154,7 @@ def to_presenter(msg, presenter_address, connection):
                     to_list['ID'][address]['head'] = 0
 
                 if output_copy[address]['Face']:
-                    face_action = to_face(address)
+                    face_action = to_face(address, setting=False)
                     if face_action == 'b':
                         to_list['ID'][address]['face'] = face_action
                     else:

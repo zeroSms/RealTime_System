@@ -1,0 +1,8 @@
+data_set,main
+サンプリング周波数,100
+オーバーラップ率,50
+ウィンドウサイズ,32
+ウィンドウラベル閾値,0.3
+max_depth,30
+n_estimator,20
+random_state,42

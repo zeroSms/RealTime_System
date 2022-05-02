@@ -28,9 +28,10 @@ def getCsv_log(file_num):
 # メイン関数
 def main():
     ex_num = input('実験番号：')
+    eSense_num = input('eSenseの番号[1-8]：')
 
     # eSenseアドレスを取得
-    address = get_address.Get()
+    address = get_address.Get(int(eSense_num))
 
     # 頭の動きのセンシング　スレッド開始
     loop = asyncio.new_event_loop()
