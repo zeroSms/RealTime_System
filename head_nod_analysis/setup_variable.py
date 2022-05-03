@@ -53,6 +53,7 @@ def face_symbol(pred_face):
 
 # ============================ ウィンドウ単位の処理用定数 ============================== #
 T = 20  # サンプリング周期 [Hz]
+conn = 70  # 通信間隔 [ms]
 N = 32  # ウィンドウサイズ
 OVERLAP = 50  # オーバーラップ率 [%]
 threshold = 0.3  # ウィンドウラベル閾値
@@ -61,6 +62,6 @@ threshold = 0.3  # ウィンドウラベル閾値
 FOLD = 10  # 交差検証数
 
 # ランダムフォレストパラメータ
-max_depth = 30
-n_estimators = 20
+max_depth = 100
+n_estimators = 100
 random_state = 42

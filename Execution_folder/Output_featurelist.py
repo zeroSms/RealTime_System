@@ -150,7 +150,8 @@ if __name__ == '__main__':
     max_depth = setup_variable.max_depth
     n_estimators = setup_variable.n_estimators
     random_state = setup_variable.random_state
-    forest = RandomForestClassifier(max_depth=max_depth, n_estimators=n_estimators, random_state=random_state)
+    # forest = RandomForestClassifier(max_depth=max_depth, n_estimators=n_estimators, random_state=random_state)
+    forest = RandomForestClassifier(random_state=random_state)
 
     # 特徴量選択
     if feature_check == '1':

@@ -54,6 +54,7 @@ def feature_name(sensor_name):
         feature_columns.extend(
             [(name + axis) for name in ['PB0-5', 'PB5-10', 'PB10-15', 'PB15-20', 'PB20-25', 'PB25-30',
                                         'PB30-35', 'PB35-40', 'PB40-45', 'PB45-50']])
+
     # Freq_Ent(周波数領域エントロピー)
     feature_columns.extend([('FE_' + name) for name in axis_columns])
     # Energy

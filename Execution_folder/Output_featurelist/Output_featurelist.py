@@ -1,5 +1,5 @@
 #
-# データ処理スレッド
+# 分類モデル作成
 #
 import csv
 import glob
@@ -52,8 +52,8 @@ def output_files(X):
 # ============================ ウィンドウ処理スレッド ============================== #
 # ウィンドウ単位の処理用定数
 T = setup_variable.T  # サンプリング周期 [Hz]
-# N = setup_variable.N  # ウィンドウサイズ
-N = 128
+N = setup_variable.N  # ウィンドウサイズ
+# N = 128
 OVERLAP = setup_variable.OVERLAP  # オーバーラップ率 [%]
 window_data = []
 get_window = []
@@ -173,8 +173,7 @@ if __name__ == '__main__':
     forest = RandomForestClassifier(max_depth=max_depth, n_estimators=n_estimators, random_state=random_state)
 
     # 特徴量選択
-    analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\window_size\\' + str(
-        N)
+    analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\test2'
     rm_make_files(analysis_data_file)
 
     X_value = X.values  # 特徴量選択後のリストを新たに作成

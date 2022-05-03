@@ -55,10 +55,11 @@ def feature_download():
 if __name__ == '__main__':
     ex_num = input('実験番号：')
     feature_check = input('特徴量選択[1/2/n/WS]：')  # 1: RFE_CV  2: SFM
-    WS = input('ウィンドウサイズ[8/16/32/64/128]：')
     over_sampling = input('オーバーサンプリング[1/2/3/4/n]：')  # 1: RFE_CV  2: SFM
     if feature_check == '2':
         SFM_threshold = input('SFM閾値[%]：')
+    elif feature_check == 'WS':
+        WS = input('ウィンドウサイズ[8/16/32/64/128]：')
     else:
         SFM_threshold = ''
 
@@ -75,16 +76,17 @@ if __name__ == '__main__':
     # clf = RandomForestClassifier(max_depth=max_depth, n_estimators=n_estimators, random_state=random_state)
     clf = RandomForestClassifier(random_state=random_state)
 
-    # 特徴量選択
-    if feature_check == '1':
-        analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\RFE_CV'
-    elif feature_check == '2':
-        analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\SFM\\SFM_' + SFM_threshold
-    elif feature_check == 'n':
-        analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\None'
-    elif feature_check == 'WS':
-        analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\window_size\\' + WS
+    analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\after'
 
+    # # 特徴量選択
+    # if feature_check == '1':
+    #     analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\RFE_CV'
+    # elif feature_check == '2':
+    #     analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\SFM\\SFM_' + SFM_threshold
+    # elif feature_check == 'n':
+    #     analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\None'
+    # elif feature_check == 'WS':
+    #     analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\window_size\\' + WS
 
     # 特徴量/正解データ取得
     X, y = feature_download()
@@ -157,4 +159,16 @@ if __name__ == '__main__':
     with open(make_file + '\\paramater' + str(ex_num) + '.csv', 'w', newline='') as f:
         writer = csv.writer(f)
         for k, v in paramater.items():
+            writer.writerow([k, v])
+
+
+    # Feature Importance
+    fti = clf.feature_importances_
+    Feature_Importance = {}
+    for i, feat in enumerate(X.columns):
+        Feature_Importance[feat] = fti[i]
+        # print('\t{0:20s} : {1:>.6f}'.format(feat, fti[i]))
+    with open(make_file + '\\Feature_Importance' + str(ex_num) + '.csv', 'w', newline='') as f:
+        writer = csv.writer(f)
+        for k, v in Feature_Importance.items():
             writer.writerow([k, v])
