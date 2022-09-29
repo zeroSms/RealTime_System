@@ -5,11 +5,11 @@ import pickle
 import sys
 import threading
 import json
+import time
+import datetime
 
 # 自作ライブラリ
-import time
-
-from head_nod_analysis import setup_variable, stop
+from head_nod_analysis import setup_variable
 
 
 # ============================ 正常終了スレッド ============================== #se
@@ -32,38 +32,41 @@ output_list, output_log = {}, {}  # 受信リスト
 
 
 # 受信した文字列をJSON形式に整形
-def shape_JSON(msg, address):
+def shape_JSON(msg):
     global output_list, output_log
     """
-    msg = {'timeStamp',
-           'class': 'Head' or 'Face'
-           'action': 頭の動きは0~2の数値，顔の表情はa~gまでの記号
+    msg = { 'presenter': True or False,
+            'ID': 1-8
+            'timeStamp',
+            'class': 'Head' or 'Face',
+            'action': 頭の動きは0~2の数値，顔の表情はa~gまでの記号
            }
 
-    output = {'address': {'Head': {timeStamp: action},
-                          'Face': {timeStamp: action}
-                          }
+    output = {'ID':{'Head': {timeStamp: action},
+                    'Face': {timeStamp: action}
+                    }
                           ...
               }
     """
-    if address not in output_list:
-        output_list[address] = {'Head': {}, 'Face': {}}
+    if msg['ID'] not in output_list:
+        output_list[msg['ID']] = {'Head': {}, 'Face': {}}
         # output_log[address] = {'Head': {}, 'Face': {}}
-    output_list[address][msg['class']][str(time.time())] = msg['action']
+    output_list[msg['ID']][msg['class']][str(time.time())] = msg['action']
     # output_log[address][msg['class']][str(time.time())] = msg['action']
 
 
-def to_presenter(msg, presenter_address, connection):
+def to_presenter(presenter_address, connection):
     """
-    msg = {'presenter': True,
-           'setting': True or False,
-           'finish': True or False
+    msg = { 'presenter': True,
+            'timeStamp': round(time.time(), 2)
+            'finish': True or False
            }
 
     to_list = {'Sum': N,
-               'ID': {'address': {'head': 'action', 'face': 'action'},
-                      'address': {'head': 'action', 'face': 'action'},
-                      }
+               'audience': {'ID': {'Head': 'action', 'Face': 'action'},
+                            'ID': {'Head': 'action', 'Face': 'action'},
+                                    ...
+                            }
                }
     """
     to_list = {}  # 送信用リスト
@@ -75,16 +78,16 @@ def to_presenter(msg, presenter_address, connection):
     output_list = {}
 
     # 各ユーザの頭の動きの決定
-    def to_head(address):
-        head_list = list(output_copy[address]['Head'].values())
+    def to_head(ID):
+        head_list = list(output_copy[ID]['Head'].values())
         # 前回繰り越しリストがあれば連結
-        if address in next_check_list:
-            head_list = next_check_list[address] + head_list
-            del next_check_list[address]
+        if ID in next_check_list:
+            head_list = next_check_list[ID] + head_list
+            del next_check_list[ID]
 
         # 要素数3未満なら次回に繰り越し
         if len(head_list) < 3:
-            next_check_list[address] = copy.copy(head_list)
+            next_check_list[ID] = copy.copy(head_list)
 
         # 返す値の決定
         count_1 = head_list.count(1)
@@ -98,81 +101,79 @@ def to_presenter(msg, presenter_address, connection):
         else:
             return 0
 
-    # # 各ユーザの表情の決定
-    # def to_face(address):
-    #     face_list = list(output_copy[address]['Face'].values())
-    #     count_face = collections.Counter(face_list)
-    #     return max(count_face, key=count_face.get)
     # 各ユーザの表情の決定
-    def to_face(address, setting=True):
-        face_list = list(output_copy[address]['Face'].values())
+    def to_face(ID):
+        face_list = list(output_copy[ID]['Face'].values())
         max_num = 0.0
         max_face = 'z'
         for face_score in face_list:
-            if face_score != 'null' and face_score[0] != 'nuetral' and face_score[1] > max_num:
+            if face_score != 'null' and face_score[0] not in ["neutral", "null"] and face_score[1] > max_num:
                 max_face = face_score[0]
                 max_num = face_score[1]
+
         if max_face == 'z':
             return 'z'
-        if max_num > 0.3:
-            return setup_variable.face_symbol(max_face)
         else:
-            return 'a'
+            return setup_variable.face_symbol(max_face)
+
+        # if max_face == 'z':
+        #     return 'z'
+        # if max_num > 0.3:
+        #     return setup_variable.face_symbol(max_face)
+        # else:
+        #     return 'a'
 
     # 視聴者の人数を計算
     audience = len(output_copy)
     if audience > 0:
+        # to_listの初期化
         to_list['Sum'] = audience
-        to_list['ID'] = {}
-        for address in output_copy.keys():
-            to_list['ID'][address] = {}
+        to_list['audience'] = {}
+
+        for ID in output_copy.keys():
+            to_list['audience'][ID] = {}
 
             # 発表者へ送ったフィードバック内容の記録
-            if address not in output_log:
-                output_log[address] = {'Head': {}, 'Face': {}}
+            if ID not in output_log:
+                output_log[ID] = {'Head': {}, 'Face': {}}
 
             # すべての反応をフィードバック
-            if msg['setting'] == True:
-                if output_copy[address]['Head']:
-                    to_list['ID'][address]['head'] = to_head(address)
-                else:
-                    to_list['ID'][address]['head'] = 0
-                if output_copy[address]['Face']:
-                    to_list['ID'][address]['face'] = to_face(address)
-                else:
-                    to_list['ID'][address]['face'] = 'a'
-
-            # ポジティブな反応のみをフィードバック
-            elif msg['setting'] == False:
-                if output_copy[address]['Head']:
-                    head_action = to_head(address)
-                    if head_action != 2:
-                        to_list['ID'][address]['head'] = head_action
-                    else:
-                        to_list['ID'][address]['head'] = 0
-                else:
-                    to_list['ID'][address]['head'] = 0
-
-                if output_copy[address]['Face']:
-                    face_action = to_face(address, setting=False)
-                    if face_action == 'b':
-                        to_list['ID'][address]['face'] = face_action
-                    else:
-                        to_list['ID'][address]['face'] = 'a'
-                else:
-                    to_list['ID'][address]['face'] = 'a'
+            if output_copy[ID]['Head']:
+                to_list['audience'][ID]['Head'] = to_head(ID)
+            else:
+                to_list['audience'][ID]['Head'] = 0
+            if output_copy[ID]['Face']:
+                to_list['audience'][ID]['Face'] = to_face(ID)
+            else:
+                to_list['audience'][ID]['Face'] = 'z'
 
             timeStamp = str(time.time())
-            output_log[address]['Head'][timeStamp] = to_list['ID'][address]['head']
-            output_log[address]['Face'][timeStamp] = to_list['ID'][address]['face']
+            output_log[ID]['Head'][timeStamp] = to_list['audience'][ID]['Head']
+            output_log[ID]['Face'][timeStamp] = to_list['audience'][ID]['Face']
 
         print(to_list)
-        connection.sendto(pickle.dumps(to_list), presenter_address)  # メッセージを返します
+        server_json = {"server": [to_list]}
+        # connection.sendto(pickle.dumps(to_list), presenter_address)  # メッセージを返します
+        with open("./db.json", 'w') as outfile:
+            json.dump(server_json, outfile)
+
 
 
 # 接続済みクライアントは読み込みおよび書き込みを繰り返す
 def loop_handler(connection, client_address):
+    start_time = datetime.datetime.now()
     while True:
+        # 一定時間ごとにJSONファイルを更新
+        now_time = datetime.datetime.now()
+        if now_time > start_time + datetime.timedelta(seconds=7):
+            start_time = now_time
+            print(output_list)
+            if len(output_list) != 0:
+                print("OK")
+                to_presenter(client_address, connection)
+            else:
+                print("NG")
+
         try:
             # クライアント側から受信する
             rcvmsg = connection.recv(4096)
@@ -186,8 +187,8 @@ def loop_handler(connection, client_address):
                     print('発表者デバイスとの通信を終了')
                     break
 
-                # 送信
-                to_presenter(rcvmsg, client_address, connection)
+                # 発表デバイスに送信
+                to_presenter(client_address, connection)
 
             # 視聴者デバイスからの受信
             else:
@@ -197,13 +198,13 @@ def loop_handler(connection, client_address):
                         print('Received {} -> {}'.format(value[1][0], rcvmsg))
 
                         # 受信した文字列をJSON形式に整形/output_listに追加
-                        shape_JSON(rcvmsg, client_address[0])
+                        # shape_JSON(rcvmsg, client_address[0])
+                        shape_JSON(rcvmsg)
 
         except Exception as e:
             print('!!!')
             print(e)
             break
-
 
 def server():
     host = socket.gethostname()  # サーバーのホスト名

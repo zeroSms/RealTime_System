@@ -68,7 +68,7 @@ push_server = []
 queue_list = []
 
 
-def Realtime_analysis(to_server=False, port_select='1'):
+def Realtime_analysis(to_server=False, port_select='1', audience_num=0):
     global window_num, feature_list, push_server
 
     # 特徴量リスト
@@ -86,6 +86,7 @@ def Realtime_analysis(to_server=False, port_select='1'):
         client.connect((host, port))  # これでサーバーに接続します
 
         response = {'presenter': False,
+                    'ID': audience_num,
                     'timeStamp': round(time.time(), 2),
                     'class': 'Head',
                     }

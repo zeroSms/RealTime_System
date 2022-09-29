@@ -31,10 +31,11 @@ def face_detection(ex_num):
 if __name__ == "__main__":
     ex_num = input('実験番号：')
     if input('サーバ通信[y/n]：') == 'y':
-        port_select = input('サーバ番号[1/2/3]：')
+        # port_select = input('サーバ番号[1/2/3]：')
+        port_select = '1'
         server = True
     else:
-        port_select = '1'
+        # port_select = '1'
         server = False
 
     # 頭の動きのセンシング　スレッド開始

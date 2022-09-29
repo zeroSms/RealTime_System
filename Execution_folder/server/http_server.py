@@ -4,6 +4,7 @@ from urllib.parse import parse_qs, urlparse
 import json
 import collections
 import socket
+import time
 
 # 自作ライブラリ
 from head_nod_analysis import setup_variable, stop
@@ -13,19 +14,18 @@ server_address = setup_variable.server_address  # '192.168.2.111'
 
 # サーバーへの送信
 response = {'presenter': True,
-            'setting': True,
+            'timeStamp': round(time.time(), 2),
             'finish': False
             }
 
-def connect_socket(rcvmsg):
+
+def connect_socket():
     host = server_address  # サーバーのホスト名
     port = audience_port
 
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # オブジェクトの作成をします
     client.connect((host, port))  # これでサーバーに接続します
 
-    if rcvmsg['setting'] == 'Feedback.positive':
-        response['setting'] = False
     print(response)
 
     massage = pickle.dumps(response)
@@ -57,11 +57,20 @@ class MyHTTPRequestHandler(BaseHTTPRequestHandler):
         print('parsed: path = {}, query = {}'.format(parsed_path.path, parse_qs(parsed_path.query)))
 
         print('headers\r\n-----\r\n{}-----'.format(self.headers))
+        print("bbbbb")
 
-        self.send_response(200)
+        # self.send_response(200)
+        # self.send_header('Content-Type', 'application/json')
+        # self.end_headers()
+        # self.wfile.write(b'Hello from do_GET')
+
+        # 視聴者側サーバとの送受信
+        send_msg = connect_socket()
+
+        self.send_response(800)
         self.send_header('Content-Type', 'application/json')
         self.end_headers()
-        self.wfile.write(b'Hello from do_GET')
+        self.wfile.write(json.dumps(send_msg).encode())
 
     def do_POST(self):
         print('path = {}'.format(self.path))
@@ -70,6 +79,7 @@ class MyHTTPRequestHandler(BaseHTTPRequestHandler):
         print('parsed: path = {}, query = {}'.format(parsed_path.path, parse_qs(parsed_path.query)))
 
         print('headers\r\n-----\r\n{}-----'.format(self.headers))
+        print("aaaaa")
 
         content_length = int(self.headers['content-length'])
 
@@ -78,7 +88,7 @@ class MyHTTPRequestHandler(BaseHTTPRequestHandler):
         print('body = {}'.format(rcvmsg))
 
         # 視聴者側サーバとの送受信
-        send_msg = connect_socket(rcvmsg)
+        send_msg = connect_socket()
 
         self.send_response(200)
         self.send_header('Content-Type', 'application/json')

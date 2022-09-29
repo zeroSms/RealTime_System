@@ -70,7 +70,7 @@ if __name__ == '__main__':
     # clf = RandomForestClassifier(max_depth=max_depth, n_estimators=n_estimators, random_state=random_state)
     clf = RandomForestClassifier(random_state=random_state)
 
-    analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\test2'
+    analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\test_0519_M1'
 
     # 特徴量/正解データ取得
     X, y = feature_download()

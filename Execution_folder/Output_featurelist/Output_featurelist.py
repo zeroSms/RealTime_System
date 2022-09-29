@@ -151,7 +151,7 @@ def rm_make_files(analysis_data_file):
 # ================================= メイン関数　実行 ================================ #
 if __name__ == '__main__':
     sensor_name = input('データセット[all/acc/gyro]：')
-    data_set = input('データセット[100Hz/main]：')
+    data_set = input('データセット[main/test]：')
 
     # 特徴量リスト
     get_feature.feature_name(sensor_name)
@@ -173,7 +173,7 @@ if __name__ == '__main__':
     forest = RandomForestClassifier(max_depth=max_depth, n_estimators=n_estimators, random_state=random_state)
 
     # 特徴量選択
-    analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\test2'
+    analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\test_0519_M1'
     rm_make_files(analysis_data_file)
 
     X_value = X.values  # 特徴量選択後のリストを新たに作成

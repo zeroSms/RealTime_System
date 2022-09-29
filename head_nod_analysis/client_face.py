@@ -15,7 +15,7 @@ server_address = setup_variable.server_address
 
 
 # ================================= 表情の決定・通信 ================================ #
-def client_face(to_server=False, port_select='1'):
+def client_face(to_server=False, port_select='1', audience_num=0):
     if to_server:
         host = server_address  # サーバーのホスト名
         client_address = socket.gethostname()  # クライアント側のホスト名
@@ -25,11 +25,11 @@ def client_face(to_server=False, port_select='1'):
         client.connect((host, port))  # これでサーバーに接続します
 
         response = {'presenter': False,
+                    'ID': audience_num,
                     'timeStamp': time.time(),
                     'class': 'Face',
                     }
 
-    timeStamp = time.time()
     while stop.stop_flg:
         time.sleep(1)
         timeStamp = time.time()
