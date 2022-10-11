@@ -33,7 +33,7 @@ output_list, output_log = {}, {}  # 受信リスト
 
 # 受信した文字列をJSON形式に整形
 def shape_JSON(msg):
-    global output_list, output_log
+    global output_list
     """
     msg = { 'presenter': True or False,
             'ID': 1-8
@@ -62,18 +62,17 @@ def to_presenter(presenter_address, connection):
             'finish': True or False
            }
 
-    to_list = {'Sum': N,
-               'audience': {'ID': {'Head': 'action', 'Face': 'action'},
-                            'ID': {'Head': 'action', 'Face': 'action'},
+    to_list = {server:[{'ID': {'Head': 0-2, 'Face': a-z},
+                        'ID': {'Head': 0-2, 'Face': a-z},
                                     ...
-                            }
-               }
+                        }
+               ]}
     """
-    to_list = {}  # 送信用リスト
     next_check_list = {}  # 次回繰り越し用リスト（要素数3未満の場合）
+    server_json = {"server": []}    # サーバ出力用
 
     # output_listの複製・初期化
-    global output_list
+    global output_list, output_log
     output_copy = copy.deepcopy(output_list)
     output_list = {}
 
@@ -126,37 +125,34 @@ def to_presenter(presenter_address, connection):
     # 視聴者の人数を計算
     audience = len(output_copy)
     if audience > 0:
-        # to_listの初期化
-        to_list['Sum'] = audience
-        to_list['audience'] = {}
-
         for ID in output_copy.keys():
-            to_list['audience'][ID] = {}
+            to_list = {'ID': ID}  # 送信用リスト
+            timeStamp = str(time.time())
 
             # 発表者へ送ったフィードバック内容の記録
             if ID not in output_log:
-                output_log[ID] = {'Head': {}, 'Face': {}}
+                output_log[ID] = {}
+                output_log[ID]['Head'] = {}
+                output_log[ID]['Face'] = {}
 
             # すべての反応をフィードバック
             if output_copy[ID]['Head']:
-                to_list['audience'][ID]['Head'] = to_head(ID)
+                to_list['Head'] = to_head(ID)
             else:
-                to_list['audience'][ID]['Head'] = 0
+                to_list['Head'] = 0
             if output_copy[ID]['Face']:
-                to_list['audience'][ID]['Face'] = to_face(ID)
+                to_list['Face'] = to_face(ID)
             else:
-                to_list['audience'][ID]['Face'] = 'z'
+                to_list['Face'] = 'z'
 
-            timeStamp = str(time.time())
-            output_log[ID]['Head'][timeStamp] = to_list['audience'][ID]['Head']
-            output_log[ID]['Face'][timeStamp] = to_list['audience'][ID]['Face']
+            output_log[ID]['Head'][timeStamp] = to_list['Head']
+            output_log[ID]['Face'][timeStamp] = to_list['Face']
+            server_json["server"].append(to_list)
 
         print(to_list)
-        server_json = {"server": [to_list]}
         # connection.sendto(pickle.dumps(to_list), presenter_address)  # メッセージを返します
         with open("./db.json", 'w') as outfile:
             json.dump(server_json, outfile)
-
 
 
 # 接続済みクライアントは読み込みおよび書き込みを繰り返す
@@ -206,6 +202,7 @@ def loop_handler(connection, client_address):
             print(e)
             break
 
+
 def server():
     host = socket.gethostname()  # サーバーのホスト名
     port = setup_variable.port_num[port_select]['audience']
@@ -239,7 +236,8 @@ def server():
         # 待受中にアクセスしてきたクライアントを追加
         clients.append((connection, client_address))
         # スレッド作成
-        thread = threading.Thread(target=loop_handler, args=(connection, client_address), daemon=True)
+        thread = threading.Thread(target=loop_handler, args=(
+            connection, client_address), daemon=True)
         # スレッドスタート
         thread.start()
 

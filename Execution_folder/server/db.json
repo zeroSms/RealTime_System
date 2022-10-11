@@ -1,1 +1,9 @@
-{"server": [{"Sum": 3, "audience": {"0": {"Head": 0, "Face": "z"}}}]}
+{"server": [{"ID": 0, "Head": 0, "Face": "b"},
+            {"ID": 1, "Head": 1, "Face": "z"},
+            {"ID": 2, "Head": 2, "Face": "c"},
+            {"ID": 2, "Head": 2, "Face": "c"},
+            {"ID": 2, "Head": 2, "Face": "c"},
+            {"ID": 2, "Head": 2, "Face": "c"},
+            {"ID": 2, "Head": 2, "Face": "c"},
+            {"ID": 2, "Head": 2, "Face": "c"},
+            {"ID": 2, "Head": 2, "Face": "c"}]}

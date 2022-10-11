@@ -12,7 +12,13 @@ server.listen(3001, '192.168.2.111', () => {
 });
 
 
-// // note PC
+// // note PC - 3H
 // server.listen(3001, '192.168.2.19', () => {
+//   console.log('run');
+// });
+
+
+// // note PC - 4K
+// server.listen(3001, '172.19.0.158', () => {
 //   console.log('run');
 // });
