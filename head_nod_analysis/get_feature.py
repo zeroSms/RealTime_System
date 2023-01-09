@@ -7,6 +7,7 @@ from scipy.fft import rfft, fft
 
 from . import setup_variable
 
+PB_list = ['PB0-5', 'PB5-10']
 
 def Sensor_name(sensor_name):
     if sensor_name == 'acc':
@@ -52,8 +53,7 @@ def feature_name(sensor_name):
     # Power Band
     for axis in axis_columns:
         feature_columns.extend(
-            [(name + axis) for name in ['PB0-5', 'PB5-10', 'PB10-15', 'PB15-20', 'PB20-25', 'PB25-30',
-                                        'PB30-35', 'PB35-40', 'PB40-45', 'PB45-50']])
+            [(name + axis) for name in PB_list])
 
     # Freq_Ent(周波数領域エントロピー)
     feature_columns.extend([('FE_' + name) for name in axis_columns])
@@ -174,7 +174,7 @@ def get_feature(window, sensor_name):
     FFT_PB = []
     for axis in axis_columns:
         # 5Hz刻みでパワーバンドを計算
-        for i in range(0, 10):
+        for i in range(0, len(PB_list)):
             PB = axis_fft[axis].Calc_PowerBand(i * 5, (i + 1) * 5)
             FFT_PB.append(PB)
     feature_list_mini.extend(FFT_PB)

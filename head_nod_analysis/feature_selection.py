@@ -33,18 +33,21 @@ class Wrapper_Method:
 
 
 class Embedded_Method:
-    def __init__(self, clf, X, y, make_file):
+    def __init__(self, clf, X, y, make_file, SFM_threshold):
         self.clf = clf
         self.X, self.y = X, y
         self.make_file = make_file
+        self.SFM_threshold = SFM_threshold
 
     def SFM(self):
         # 特徴量削減
-        selector = SelectFromModel(self.clf, threshold=0.01)  # 閾値以上の特徴量を選択
+        selector = SelectFromModel(self.clf, threshold=self.SFM_threshold)  # 閾値以上の特徴量を選択
         X_new = pd.DataFrame(selector.fit_transform(self.X, self.y),
                              columns=self.X.columns.values[selector.get_support()])
         result = pd.DataFrame(selector.get_support(), index=self.X.columns.values, columns=['False: dropped'])
         result['featureImportances'] = selector.estimator_.feature_importances_
+        print(result[result['featureImportances'] >= self.SFM_threshold])
+        feature_num = len(result[result['featureImportances'] >= self.SFM_threshold])
         result.to_csv(self.make_file + '\\feature_rank.csv')
 
-        return X_new
+        return X_new, feature_num

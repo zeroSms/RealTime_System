@@ -7,6 +7,7 @@ import threading
 import json
 import time
 import datetime
+import random
 
 # 自作ライブラリ
 from head_nod_analysis import setup_variable
@@ -122,11 +123,21 @@ def to_presenter(presenter_address, connection):
         # else:
         #     return 'a'
 
+    # 乱数生成
+    def rand_nodup(a, b, k):
+        if abs(a) + b < k:
+            raise ValueError
+        r = set()
+        while len(r) < k:
+            r.add(random.randint(a, b))
+        return r
+
     # 視聴者の人数を計算
     audience = len(output_copy)
+    rand_sort = rand_nodup(0, audience, audience)
     if audience > 0:
         for ID in output_copy.keys():
-            to_list = {'ID': ID}  # 送信用リスト
+            to_list = {'ID': ID, 'sort': rand_sort[ID]}  # 送信用リスト
             timeStamp = str(time.time())
 
             # 発表者へ送ったフィードバック内容の記録

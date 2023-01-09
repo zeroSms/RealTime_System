@@ -54,6 +54,8 @@ def feature_download():
 # ================================= メイン関数　実行 ================================ #
 if __name__ == '__main__':
     ex_num = input('実験番号：')
+    feature_file_name = input('Feature_file_name: ')
+
     feature_check = input('特徴量選択[1/2/n/WS]：')  # 1: RFE_CV  2: SFM
     over_sampling = input('オーバーサンプリング[1/2/3/4/n]：')  # 1: RFE_CV  2: SFM
     if feature_check == '2':
@@ -76,7 +78,7 @@ if __name__ == '__main__':
     # clf = RandomForestClassifier(max_depth=max_depth, n_estimators=n_estimators, random_state=random_state)
     clf = RandomForestClassifier(random_state=random_state)
 
-    analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\after'
+    analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\' + feature_file_name
 
     # # 特徴量選択
     # if feature_check == '1':
