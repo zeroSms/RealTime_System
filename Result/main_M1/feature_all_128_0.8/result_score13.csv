@@ -1,0 +1,7 @@
+,precision,recall,f1-score,support
+others,0.998,1.0,0.999,13356
+nod,1.0,0.071,0.133,14
+shake,0.0,0.0,0.0,12
+accuracy,0.998,0.998,0.998,0
+macro avg,0.666,0.357,0.377,13382
+weighted avg,0.997,0.998,0.997,13382
