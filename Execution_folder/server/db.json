@@ -1,9 +1,1 @@
-{"server": [{"ID": 0, "sort": 4, "Head": 1, "Face": "e"},
-            {"ID": 1, "sort": 1, "Head": 0, "Face": "a"},
-            {"ID": 2, "sort": 2, "Head": 0, "Face": "b"},
-            {"ID": 3, "sort": 8, "Head": 2, "Face": "c"},
-            {"ID": 4, "sort": 7, "Head": 0, "Face": "a"},
-            {"ID": 5, "sort": 6, "Head": 0, "Face": "c"},
-            {"ID": 6, "sort": 3, "Head": 0, "Face": "e"},
-            {"ID": 7, "sort": 5, "Head": 0, "Face": "e"}]
-}
+{"server": [{"id": 3, "sort": 0, "Head": 2, "Face": "e"}, {"id": 5, "sort": 1, "Head": 2, "Face": "a"}, {"id": 8, "sort": 2, "Head": 2, "Face": "b"}, {"id": 0, "sort": 3, "Head": 1, "Face": "b"}, {"id": 7, "sort": 4, "Head": 1, "Face": "e"}, {"id": 4, "sort": 5, "Head": 2, "Face": "c"}, {"id": 9, "sort": 6, "Head": 0, "Face": "c"}, {"id": 6, "sort": 7, "Head": 0, "Face": "c"}, {"id": 2, "sort": 8, "Head": 1, "Face": "b"}, {"id": 1, "sort": 9, "Head": 0, "Face": "a"}]}
