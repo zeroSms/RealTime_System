@@ -5,7 +5,7 @@ import time
 from pprint import pprint
 
 
-N = 10
+N = 24
 face_list = ["a", "b", "c", "e"]
 
 
