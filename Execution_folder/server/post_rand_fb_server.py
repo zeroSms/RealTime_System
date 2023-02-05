@@ -10,9 +10,9 @@ face_list = ["a", "b", "c", "e"]
 
 # 各反応出現割合
 JOY = 25
-SURPRISE = 10
+SURPRISE = 5
 NOD = 15
-SHAKE = 10
+SHAKE = 5
 
 
 def post_json():
