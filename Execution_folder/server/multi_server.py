@@ -134,10 +134,10 @@ def to_presenter(presenter_address, connection):
 
     # 視聴者の人数を計算
     audience = len(output_copy)
-    rand_sort = rand_nodup(0, audience, audience)
+    rand_sort = list(rand_nodup(0, audience, audience))
     if audience > 0:
         for ID in output_copy.keys():
-            to_list = {'ID': ID, 'sort': rand_sort[ID]}  # 送信用リスト
+            to_list = {'ID': ID, 'sort': rand_sort[int(ID)]}  # 送信用リスト
             timeStamp = str(time.time())
 
             # 発表者へ送ったフィードバック内容の記録

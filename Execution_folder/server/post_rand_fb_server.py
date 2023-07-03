@@ -5,7 +5,7 @@ import time
 from pprint import pprint
 
 
-N = 50  # アイコンの数
+N = 8  # アイコンの数
 face_list = ["a", "b", "c", "e"]
 
 # 各反応出現割合

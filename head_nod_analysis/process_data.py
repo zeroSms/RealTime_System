@@ -43,6 +43,8 @@ def label_shape(window):
     return window_T.T, answer_num
 
 # 頭の動きの検出結果の平滑化
+
+
 def smoothie(queue_list):
     if queue_list.count('1') >= 2:
         return 1
@@ -72,17 +74,19 @@ def Realtime_analysis(to_server=False, port_select='1', audience_num=0):
     global window_num, feature_list, push_server
 
     # 特徴量リスト
-    clf = pickle.load(open(path + '\\data_set\\analysis_files\\main\\trained_model.pkl', 'rb'))
+    clf = pickle.load(open(
+        path + '\\data_set\\analysis_files\\main\\trained_modelall_32_0.2_SFM0.003.pkl', 'rb'))
     sensor_name = 'all'
     get_feature.feature_name(sensor_name)
-    filename = path + '\\data_set\\analysis_files\\feature_selection\\all\\SFM\\SFM_35\\feature_list_selection0.csv'
+    filename = path + '\\data_set\\analysis_files\\feature_selection\\all\\SFM\\WS32_threshold0.2_SFM0.003\\feature_list_selection0.csv'
     selection_X = pd.read_csv(filename)
 
     if to_server:
         host = server_address  # サーバーのホスト名
         port = setup_variable.port_num[port_select]['audience']
 
-        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # オブジェクトの作成をします
+        client = socket.socket(
+            socket.AF_INET, socket.SOCK_STREAM)  # オブジェクトの作成をします
         client.connect((host, port))  # これでサーバーに接続します
 
         response = {'presenter': False,
@@ -104,8 +108,10 @@ def Realtime_analysis(to_server=False, port_select='1', audience_num=0):
 
             # リアルタイム行動分析-特徴量抽出
             feature_list.append(get_feature.get_feature(window, sensor_name))
-            test_x = pd.DataFrame(feature_list, columns=get_feature.feature_columns)
-            selection_X_columns = selection_X.columns[1:].tolist()  # 特徴量選択後のカラムを取得
+            test_x = pd.DataFrame(
+                feature_list, columns=get_feature.feature_columns)
+            # 特徴量選択後のカラムを取得
+            selection_X_columns = selection_X.columns[1:].tolist()
             test_x = test_x.loc[:, selection_X_columns]
             test_x = test_x.values
 
@@ -128,9 +134,11 @@ def Realtime_analysis(to_server=False, port_select='1', audience_num=0):
     print(answer_list)
     test_y = pd.Series(data=answer_list)
     y_pred = pd.Series(data=realtime_pred)
-    print(classification_report(test_y, y_pred, target_names=['others', 'nod', 'shake']))
+    print(classification_report(test_y, y_pred,
+          target_names=['others', 'nod', 'shake']))
 
     realtime_pred.pop(0)
     realtime_pred.append('0')
     y_pred = pd.Series(data=realtime_pred)
-    print(classification_report(test_y, y_pred, target_names=['others', 'nod', 'shake']))
+    print(classification_report(test_y, y_pred,
+          target_names=['others', 'nod', 'shake']))
