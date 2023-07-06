@@ -6,19 +6,13 @@ const middlewares = jsonServer.defaults();
 server.use(middlewares);
 server.use(router);
 
-// Labo PC
-server.listen(3001, '192.168.2.111', () => {
+
+// server_address = '192.168.2.111'
+server_address = '192.168.2.22'   // dlcl_1, notePC
+// server_address = '172.19.0.44'    // cs-wlan-g, notePC
+// server_address = '192.168.0.2'  // 4H - aterm, notePC
+
+
+server.listen(3001, server_address, () => {
   console.log('run');
 });
-
-
-// // note PC - 3H
-// server.listen(3001, '192.168.2.19', () => {
-//   console.log('run');
-// });
-
-
-// // note PC - 4K
-// server.listen(3001, '172.19.0.158', () => {
-//   console.log('run');
-// });

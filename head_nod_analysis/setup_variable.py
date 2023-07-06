@@ -7,13 +7,12 @@
 import os
 
 path = os.getcwd().rsplit('\\', 1)[0]
-server_address = '192.168.2.111'
-port_num = {'1': {'presenter': 5001,
-                  'audience': 50001},
-            '2': {'presenter': 5002,
-                  'audience': 50002},
-            '3': {'presenter': 5003,
-                  'audience': 50003}}
+# server_address = '192.168.2.111'
+server_address = '192.168.2.22'  # 3A, notePC
+# server_address = '172.19.0.44'  # cs-wlan, notePC
+# server_address = '192.168.0.2'  # 4H-aterm, notePC
+
+port_num = {'1': {'audience': 50010}}
 
 eSense_name = ['eSense-0220', 'eSense-0328', 'eSense-0376', 'eSense-0459',
                'eSense-0498', 'eSense-0586', 'eSense-0592', 'eSense-0666']

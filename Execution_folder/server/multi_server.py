@@ -219,6 +219,7 @@ def server():
     port = setup_variable.port_num[port_select]['audience']
 
     print(host)
+    print(port)
     print(socket.gethostbyname(host))
 
     serversock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
