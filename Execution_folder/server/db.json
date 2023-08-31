@@ -1,1 +1,1 @@
-{"server": [{"ID": "0", "sort": 0, "Head": 0, "Face": "z"}]}
+{"server": [{"id": 7, "sort": 0, "Head": 1, "Face": "a"}, {"id": 2, "sort": 1, "Head": 0, "Face": "a"}, {"id": 0, "sort": 2, "Head": 0, "Face": "b"}, {"id": 5, "sort": 3, "Head": 1, "Face": "b"}, {"id": 3, "sort": 4, "Head": 0, "Face": "a"}, {"id": 6, "sort": 5, "Head": 2, "Face": "a"}, {"id": 4, "sort": 6, "Head": 0, "Face": "b"}, {"id": 1, "sort": 7, "Head": 0, "Face": "b"}]}
