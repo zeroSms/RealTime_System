@@ -126,7 +126,7 @@ def rm_make_files(analysis_data_file):
 # ================================= メイン関数　実行 ================================ #
 if __name__ == '__main__':
     sensor_name = input('データセット[all/acc/gyro]：')
-    data_set = input('データセット[100Hz/main]：')
+    data_set = input('データセット：')
     feature_check = input('特徴量選択[1/2/n]：')  # 1: RFE_CV  2: SFM
     if feature_check == '2':
         SFM_threshold = input('SFM閾値[001/%]：')
@@ -147,8 +147,8 @@ if __name__ == '__main__':
     y = pd.Series(data=np.array(answer_list))
 
     # 分類モデルの適用
-    max_depth = setup_variable.max_depth
-    n_estimators = setup_variable.n_estimators
+    # max_depth = setup_variable.max_depth
+    # n_estimators = setup_variable.n_estimators
     random_state = setup_variable.random_state
     # forest = RandomForestClassifier(max_depth=max_depth, n_estimators=n_estimators, random_state=random_state)
     forest = RandomForestClassifier(random_state=random_state)
@@ -164,9 +164,6 @@ if __name__ == '__main__':
         rm_make_files(analysis_data_file)
         method = feature_selection.Embedded_Method(forest, X, y, analysis_data_file)
         X = method.SFM()
-    elif feature_check == '100Hz':
-        analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\100Hz'
-        rm_make_files(analysis_data_file)
     else:
         analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\None'
         rm_make_files(analysis_data_file)

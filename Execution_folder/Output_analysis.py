@@ -73,9 +73,6 @@ if __name__ == '__main__':
 
     # 分類モデルの適用
     random_state = setup_variable.random_state
-    max_depth = setup_variable.max_depth
-    n_estimators = setup_variable.n_estimators
-    # clf = RandomForestClassifier(max_depth=max_depth, n_estimators=n_estimators, random_state=random_state)
     clf = RandomForestClassifier(random_state=random_state)
 
     analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\' + feature_file_name

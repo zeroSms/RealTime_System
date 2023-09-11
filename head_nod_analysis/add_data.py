@@ -107,8 +107,8 @@ class Sensor:
             print("Connected: {0}".format(x))
 
             # サンプリング開始
-            await client.write_gatt_char(UUID7, sampling_byte(), response=True)
-            await client.write_gatt_char(UUID7, sampling_conn(), response=True)
+            await client.write_gatt_char(UUID7, sampling_byte(), response=True) # サンプリング開始，周波数設定
+            await client.write_gatt_char(UUID7, sampling_conn(), response=True) # 接続間隔の設定
 
             await client.start_notify(UUID8, Sensor.callback)
 
@@ -149,24 +149,3 @@ def AddData(address, loop):
     asyncio.set_event_loop(loop)
     loop.run_until_complete(sensor.ReadSensor())
 
-# def get_address():
-#     loop = asyncio.get_event_loop()
-#     loop.run_until_complete(search_eSense())
-
-# def AddData1():
-#     filename = "data_files/others/value_list" + input("file_number 入力：") + ".csv"
-#     print("ファイル名：" + filename)
-#
-#     loop = asyncio.get_event_loop()
-#     loop.run_until_complete(search_eSense())
-#     address = eSense_address[0]
-#     loop = asyncio.get_event_loop()
-#     loop.run_until_complete(Sensor(address, loop).ReadSensor())
-#
-#     with open(filename, 'w') as f:
-#         writer = csv.writer(f, lineterminator='\n')
-#         writer.writerows(data_queue)
-#
-#
-# if __name__ == '__main__':
-#     AddData1()

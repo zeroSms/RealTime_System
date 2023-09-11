@@ -12,7 +12,7 @@ face_list = ["a", "b", "c", "e"]
 JOY = 25
 SURPRISE = 5
 NOD = 15
-SHAKE = 5
+SHAKE = 0
 
 
 def post_json():
