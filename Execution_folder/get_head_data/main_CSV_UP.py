@@ -14,7 +14,6 @@ from head_nod_analysis.enter_label import Label
 # ================================= パスの取得 ================================ #
 path = setup_variable.path
 
-
 # ================================= CSV出力 ================================ #
 # ログファイル出力
 def getCsv_log(file_num):
@@ -28,7 +27,7 @@ def getCsv_log(file_num):
 # メイン関数
 def main():
     ex_num = input('実験番号：')
-    eSense_num = input('eSenseの番号[1-8]：')
+    eSense_num = input('eSenseの番号[1-10]：')
 
     # eSenseアドレスを取得
     address = get_address.Get(int(eSense_num))

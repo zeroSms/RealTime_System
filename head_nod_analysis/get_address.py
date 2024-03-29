@@ -5,7 +5,10 @@
 import asyncio
 from bleak import discover
 
-eSense_name = ['eSense-0220', 'eSense-0328', 'eSense-0376', 'eSense-0459', 'eSense-0498', 'eSense-0586', 'eSense-0592', 'eSense-0666']
+# 自作ライブラリ
+from . import setup_variable
+
+eSense_name = setup_variable.eSense_name
 
 # ============================ eSenseのアドレスを取得 ============================== #
 eSense_address = 0

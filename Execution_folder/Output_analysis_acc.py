@@ -40,7 +40,7 @@ def feature_download():
         df.append(pd.read_csv(file_name, header=0, index_col=0))
     X = pd.concat(df)
 
-    # 正解リストの出力
+    # 正解リストの取得
     answer_file = analysis_data_file + '\\answer_list.csv'  # 全ファイル
     with open(answer_file) as f:
         reader = csv.reader(f)
@@ -71,15 +71,19 @@ if __name__ == '__main__':
     max_depth = setup_variable.max_depth
     n_estimators = setup_variable.n_estimators
     random_state = setup_variable.random_state
-    forest = RandomForestClassifier(max_depth=max_depth, n_estimators=n_estimators, random_state=random_state)
+    forest = RandomForestClassifier(
+        max_depth=max_depth, n_estimators=n_estimators, random_state=random_state)
 
     # 特徴量選択
     if feature_check == '1':
-        analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\RFE_CV'
+        analysis_data_file = path + \
+            '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\RFE_CV'
     elif feature_check == '2':
-        analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\SFM\\SFM_' + SFM_threshold
+        analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + \
+            sensor_name + '\\SFM\\SFM_' + SFM_threshold
     else:
-        analysis_data_file = path + '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\None'
+        analysis_data_file = path + \
+            '\\data_set\\analysis_files\\feature_selection\\' + sensor_name + '\\None'
 
     # 特徴量/正解データ取得
     X, y = feature_download()
@@ -87,9 +91,11 @@ if __name__ == '__main__':
 
     # パイプライン化
     if over_sampling == '1':
-        classifer = Pipeline([('sm', SMOTE(k_neighbors=5, random_state=random_state)), ('estimator', forest)])
+        classifer = Pipeline(
+            [('sm', SMOTE(k_neighbors=5, random_state=random_state)), ('estimator', forest)])
     elif over_sampling == '2':
-        classifer = Pipeline([('ada', ADASYN(random_state=random_state)), ('estimator', forest)])
+        classifer = Pipeline(
+            [('ada', ADASYN(random_state=random_state)), ('estimator', forest)])
     elif over_sampling == '3':
         classifer = Pipeline([('blsm',
                                BorderlineSMOTE(sampling_strategy='auto', k_neighbors=5, random_state=random_state,
@@ -103,11 +109,13 @@ if __name__ == '__main__':
     # 分析ファイルの出力（全データ）　⇒　リアルタイム分析用
     classifer.fit(X_value, y)
     trained_file = path + '\\data_set\\analysis_files\\trained_model'
-    pickle.dump(forest, open(trained_file + '\\trained_model' + str(ex_num) + '.pkl', 'wb'))
+    pickle.dump(forest, open(trained_file +
+                '\\trained_model' + str(ex_num) + '.pkl', 'wb'))
 
     # 層化k分割交差検証
     FOLD = setup_variable.FOLD  # 交差検証分割数
-    stratifiedkfold = StratifiedKFold(n_splits=FOLD, shuffle=True, random_state=random_state)
+    stratifiedkfold = StratifiedKFold(
+        n_splits=FOLD, shuffle=True, random_state=random_state)
     scores = cross_validate(classifer, X_value, y, cv=stratifiedkfold, scoring=['f1_micro', 'f1_macro', 'f1_weighted',
                                                                                 'recall_micro', 'recall_macro',
                                                                                 'recall_weighted',
@@ -117,7 +125,8 @@ if __name__ == '__main__':
 
     # 層化k分割交差検証(予測結果リストの出力)
     y_pred = cross_val_predict(classifer, X_value, y, cv=stratifiedkfold)
-    test_score = classification_report(y, y_pred, target_names=['others', 'nod', 'shake'], digits=3, output_dict=True)
+    test_score = classification_report(
+        y, y_pred, target_names=['others', 'nod', 'shake'], digits=3, output_dict=True)
 
     # 混同行列
     view_Confusion_matrix.print_cmx(y, y_pred, make_file, ex_num)

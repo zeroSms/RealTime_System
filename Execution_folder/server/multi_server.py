@@ -56,7 +56,7 @@ def shape_JSON(msg):
     # output_log[address][msg['class']][str(time.time())] = msg['action']
 
 
-def to_presenter(presenter_address, connection):
+def to_presenter():
     """
     msg = { 'presenter': True,
             'timeStamp': round(time.time(), 2)
@@ -104,6 +104,7 @@ def to_presenter(presenter_address, connection):
     # 各ユーザの表情の決定
     def to_face(ID):
         face_list = list(output_copy[ID]['Face'].values())
+        print(face_list)
         max_num = 0.0
         max_face = 'z'
         for face_score in face_list:
@@ -136,8 +137,12 @@ def to_presenter(presenter_address, connection):
     audience = len(output_copy)
     rand_sort = list(rand_nodup(0, audience, audience))
     if audience > 0:
+        print(output_copy)
         for ID in output_copy.keys():
-            to_list = {'ID': ID, 'sort': rand_sort[int(ID)]}  # 送信用リスト
+            # ID = int(ID)
+            print(ID)
+            to_list = {'ID': ID, 'sort': rand_sort[int(ID) % audience]}  # 送信用リスト
+            print(to_list)
             timeStamp = str(time.time())
 
             # 発表者へ送ったフィードバック内容の記録
@@ -168,16 +173,20 @@ def to_presenter(presenter_address, connection):
 
 # 接続済みクライアントは読み込みおよび書き込みを繰り返す
 def loop_handler(connection, client_address):
-    start_time = datetime.datetime.now()
+    global start_time
+    # start_time = datetime.datetime.now()
     while True:
         # 一定時間ごとにJSONファイルを更新
         now_time = datetime.datetime.now()
         if now_time > start_time + datetime.timedelta(seconds=7):
+            print('=========', now_time, start_time)
+
+
             start_time = now_time
             print(output_list)
             if len(output_list) != 0:
                 print("OK")
-                to_presenter(client_address, connection)
+                to_presenter()
             else:
                 print("NG")
 
@@ -195,7 +204,7 @@ def loop_handler(connection, client_address):
                     break
 
                 # 発表デバイスに送信
-                to_presenter(client_address, connection)
+                to_presenter()
 
             # 視聴者デバイスからの受信
             else:
@@ -215,6 +224,7 @@ def loop_handler(connection, client_address):
 
 
 def server():
+    global start_time
     host = socket.gethostname()  # サーバーのホスト名
     port = setup_variable.port_num[port_select]['audience']
 
@@ -228,7 +238,21 @@ def server():
     serversock.listen(10)  # 接続の待ち受けをします（キューの最大数を指定）
 
     print('Waiting for connections...')
+    start_time = datetime.datetime.now()
     while True:
+        # # 一定時間ごとにJSONファイルを更新
+        # now_time = datetime.datetime.now()
+        # if now_time > start_time + datetime.timedelta(seconds=7):
+        #     print('=========', now_time, start_time)
+        #     start_time = now_time
+        #     print(output_list)
+        #     if len(output_list) != 0:
+        #         print("OK")
+        #         to_presenter()
+        #     else:
+        #         print("NG")
+
+
         try:
             # 接続要求を受信
             connection, client_address = serversock.accept()  # 接続されればデータを格納
